@@ -1,0 +1,13 @@
+# Private keys
+keys/*.pem
+
+# Logs
+logs/
+ledger/*.log
+
+# State
+state/
+
+# Temporary
+*.bin
+*.txt

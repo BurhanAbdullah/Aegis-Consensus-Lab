@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LEDGER="ledger/ledger.log"
+VOTES="logs/votes.log"
+VALIDATORS="validators/list.txt"
+
+ID="${1:-}"
+
+if [ -z "$ID" ]; then
+  echo "Usage: consensus.sh <proposal_id>"
+  exit 1
+fi
+
+mkdir -p ledger logs
+touch "$LEDGER" "$VOTES"
+
+TOTAL=$(wc -l < "$VALIDATORS")
+F=$(( (TOTAL - 1) / 3 ))
+THRESHOLD=$(( 2 * F + 1 ))
+
+PREPARE_YES=0
+COMMIT_YES=0
+
+declare -A PREPARE_SEEN
+declare -A COMMIT_SEEN
+
+while IFS='|' read -r PID PHASE VALIDATOR VOTE SIG; do
+
+  [ "$PID" != "$ID" ] && continue
+  [ "$VOTE" != "yes" ] && continue
+
+  if ! grep -qx "$VALIDATOR" "$VALIDATORS"; then
+    continue
+  fi
+
+  MSG="${PID}|${PHASE}|${VALIDATOR}|${VOTE}"
+
+  SIG_FILE=$(mktemp)
+  MSG_FILE=$(mktemp)
+
+  echo "$SIG" | base64 -d > "$SIG_FILE" 2>/dev/null || { rm -f "$SIG_FILE" "$MSG_FILE"; continue; }
+  printf "%s" "$MSG" > "$MSG_FILE"
+
+  if ! openssl dgst -sha256 -verify "keys/${VALIDATOR}.pub" \
+        -signature "$SIG_FILE" "$MSG_FILE" > /dev/null 2>&1; then
+      rm -f "$SIG_FILE" "$MSG_FILE"
+      continue
+  fi
+
+  rm -f "$SIG_FILE" "$MSG_FILE"
+
+  if [ "$PHASE" = "prepare" ]; then
+      if [ -z "${PREPARE_SEEN[$VALIDATOR]+x}" ]; then
+          PREPARE_SEEN[$VALIDATOR]=1
+          PREPARE_YES=$((PREPARE_YES + 1))
+      fi
+  fi
+
+  if [ "$PHASE" = "commit" ]; then
+      if [ -z "${COMMIT_SEEN[$VALIDATOR]+x}" ]; then
+          COMMIT_SEEN[$VALIDATOR]=1
+          COMMIT_YES=$((COMMIT_YES + 1))
+      fi
+  fi
+
+done < "$VOTES"
+
+echo "Prepare votes: $PREPARE_YES / $TOTAL (quorum: $THRESHOLD)"
+echo "Commit votes: $COMMIT_YES / $TOTAL (quorum: $THRESHOLD)"
+
+if [ "$PREPARE_YES" -lt "$THRESHOLD" ]; then
+  echo "Consensus not reached (prepare quorum missing)."
+  exit 0
+fi
+
+if [ "$COMMIT_YES" -lt "$THRESHOLD" ]; then
+  echo "Consensus not reached (commit quorum missing)."
+  exit 0
+fi
+
+INDEX=$(wc -l < "$LEDGER")
+TIMESTAMP=$(date +%s)
+
+PREV_HASH=$(tail -n 1 "$LEDGER" 2>/dev/null | awk -F'|' '{print $6}')
+[ -z "$PREV_HASH" ] && PREV_HASH="GENESIS"
+
+PROPOSAL_HASH=$(sha256sum "proposals/${ID}.txt" 2>/dev/null | awk '{print $1}')
+[ -z "$PROPOSAL_HASH" ] && PROPOSAL_HASH="NO_PROPOSAL_FILE"
+
+DATA="${INDEX}|${TIMESTAMP}|${ID}|${PROPOSAL_HASH}|${PREV_HASH}"
+HASH=$(printf "%s" "$DATA" | sha256sum | awk '{print $1}')
+
+BLOCK_SIG=$(printf "%s" "$HASH" | \
+  openssl dgst -sha256 -sign keys/consensus.pem | \
+  base64 -w 0)
+
+echo "${DATA}|${HASH}|${BLOCK_SIG}" >> "$LEDGER"
+
+echo "Consensus reached under strict PBFT. Block appended."
+INDEX=$(wc -l < "$LEDGER")
+TIMESTAMP=$(date +%s)
+
+PREV_HASH=$(tail -n 1 "$LEDGER" 2>/dev/null | awk -F'|' '{print $6}')
+[ -z "$PREV_HASH" ] && PREV_HASH="GENESIS"
+
+PROPOSAL_HASH=$(sha256sum "proposals/${ID}.txt" 2>/dev/null | awk '{print $1}')
+[ -z "$PROPOSAL_HASH" ] && PROPOSAL_HASH="NO_PROPOSAL_FILE"
+
+DATA="${INDEX}|${TIMESTAMP}|${ID}|${PROPOSAL_HASH}|${PREV_HASH}"
+HASH=$(printf "%s" "$DATA" | sha256sum | awk '{print $1}')
+
+BLOCK_SIG=$(printf "%s" "$HASH" | \
+  openssl dgst -sha256 -sign keys/consensus.pem | \
+  base64 -w 0)
+
+echo "${DATA}|${HASH}|${BLOCK_SIG}" >> "$LEDGER"
+
+echo "Consensus reached under strict PBFT. Block appended."

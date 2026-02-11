@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+
+LEDGER="ledger/ledger.log"
+VOTES="logs/votes.log"
+VALIDATORS="validators/list.txt"
+
+ID="$1"
+
+if [ -z "$ID" ]; then
+  echo "Usage: consensus.sh <proposal_id>"
+  exit 1
+cat > core/consensus.sh << 'EOF'
+#!/usr/bin/env bash
+
+LEDGER="ledger/ledger.log"
+VOTES="logs/votes.log"
+VALIDATORS="validators/list.txt"
+
+ID="$1"
+
+if [ -z "$ID" ]; then
+  echo "Usage: consensus.sh <proposal_id>"
+  exit 1
+fi
+
+# Prevent double finalization
+if grep -q "|$ID|" "$LEDGER" 2>/dev/null; then
+  echo "Already finalized."
+  exit 0
+fi
+
+# Count validators
+TOTAL=$(wc -l < "$VALIDATORS")
+THRESHOLD=$(( (TOTAL / 2) + 1 ))
+
+YES=0
+> /tmp/seen_validators
+
+while IFS='|' read -r PID VALIDATOR VOTE SIG; do
+
+  [ "$PID" != "$ID" ] && continue
+  [ "$VOTE" != "yes" ] && continue
+
+  # Validator must be registered
+  if ! grep -qx "$VALIDATOR" "$VALIDATORS"; then
+    continue
+  fi
+
+  # Public key must exist
+  if [ ! -f "keys/${VALIDATOR}.pub" ]; then
+    continue
+  fi
+
+  MSG="$PID|$VALIDATOR|$VOTE"
+
+  echo "$SIG" | base64 -d > /tmp/sig.bin 2>/dev/null
+  echo -n "$MSG" > /tmp/msg.txt
+
+  if openssl dgst -sha256 -verify "keys/${VALIDATOR}.pub" -signature /tmp/sig.bin /tmp/msg.txt > /dev/null 2>&1; then
+
+    if ! grep -qx "$VALIDATOR" /tmp/seen_validators; then
+      echo "$VALIDATOR" >> /tmp/seen_validators
+      YES=$((YES + 1))
+    fi
+
+  fi
+
+done < "$VOTES"
+
+rm -f /tmp/sig.bin /tmp/msg.txt /tmp/seen_validators
+
+echo "Yes votes: $YES / $TOTAL (threshold: $THRESHOLD)"
+
+if [ "$YES" -ge "$THRESHOLD" ]; then
+
+  INDEX=$(wc -l < "$LEDGER")
+  TIMESTAMP=$(date +%s)
+
+  PREV_HASH=$(tail -n 1 "$LEDGER" | awk -F'|' '{print $NF}')
+  [ -z "$PREV_HASH" ] && PREV_HASH="GENESIS"
+
+  DATA="$INDEX|$TIMESTAMP|$ID|$PREV_HASH"
+  HASH=$(echo -n "$DATA" | sha256sum | awk '{print $1}')
+
+  echo "$DATA|$HASH" >> "$LEDGER"
+
+  echo "Consensus reached. Block appended."
+else
+  echo "Consensus not reached."
+fi
+EOF
+fi
+
+# Prevent double finalization
+if grep -q "|$ID|" "$LEDGER" 2>/dev/null; then
+  echo "Already finalized."
+  exit 0
+fi
+
+# Count validators
+TOTAL=$(wc -l < "$VALIDATORS")
+THRESHOLD=$(( (TOTAL / 2) + 1 ))
+
+YES=0
+> /tmp/seen_validators
+
+while IFS='|' read -r PID VALIDATOR VOTE SIG; do
+
+  [ "$PID" != "$ID" ] && continue
+  [ "$VOTE" != "yes" ] && continue
+
+  # Validator must be in validator list
+  if ! grep -qx "$VALIDATOR" "$VALIDATORS"; then
+    continue
+  fi
+
+  # Public key must exist
+  if [ ! -f "keys/${VALIDATOR}.pub" ]; then
+    continue
+  fi
+
+  MSG="$PID|$VALIDATOR|$VOTE"
+
+  echo "$SIG" | base64 -d > /tmp/sig.bin 2>/dev/null
+  echo -n "$MSG" > /tmp/msg.txt
+
+  if openssl dgst -sha256 -verify "keys/${VALIDATOR}.pub" -signature /tmp/sig.bin /tmp/msg.txt > /dev/null 2>&1; then
+
+    # Prevent duplicate validator counting
+    if ! grep -qx "$VALIDATOR" /tmp/seen_validators; then
+      echo "$VALIDATOR" >> /tmp/seen_validators
+      YES=$((YES + 1))
+    fi
+
+  fi
+
+done < "$VOTES"
+
+rm -f /tmp/sig.bin /tmp/msg.txt /tmp/seen_validators
