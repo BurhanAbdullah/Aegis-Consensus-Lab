@@ -1,0 +1,7 @@
+Metric,Baseline,Predictive
+Mean Finalizations,135.03,139.11
+Maximum,187.0,180.0
+Minimum,89.0,101.0
+Standard Deviation,24.6,19.8
+Stable Regions (>=160),5.0,5.0
+Collapse Regions (<80),0.0,0.0
