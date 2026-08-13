@@ -15,15 +15,17 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Freeze novelty/contributions
 - [x] Freeze terminology and initial threat-model direction
 - [x] Define canonical mathematical rebuild specification
+- [x] Derive scalar trust equilibrium and exact local stability condition
+- [x] Derive candidate weighted-quorum safety condition
+- [x] Derive candidate availability condition
+- [x] Derive candidate nonempty safety/availability interval
+- [x] Define coupled Jacobian analysis target
 - [ ] Complete unified mathematical state model
-- [ ] Complete trust dynamics
-- [ ] Complete predictive risk containment
-- [ ] Complete weighted quorum model
-- [ ] Derive equilibrium conditions
-- [ ] Derive local stability conditions
-- [ ] Derive security–availability feasibility boundary
+- [ ] Complete predictive risk containment law
+- [ ] Complete weighted quorum proof with final adversary semantics
+- [ ] Prove all theorem candidates under final assumptions
 - [ ] Align implementation with equations
-- [ ] Add unit/property tests
+- [ ] Add unit/property tests for final model
 - [ ] Rebuild reproducible experiments
 - [ ] Reconcile all manuscript numbers with generated results
 - [ ] Add strong baselines
@@ -42,6 +44,12 @@ Central question: under what conditions can predictive trust adaptation improve 
 
 Core contribution direction: multidimensional trust + predictive influence attenuation + adaptive weighted quorum + formal equilibrium/stability/quorum-feasibility analysis + empirical phase-boundary validation.
 
+## Current mathematical gate
+The coupled system is now treated as a dynamical system rather than a collection of independent mechanisms. The target operating set is
+F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=1-b}.
+
+The analytical boundary is still provisional until the risk law E(tau,R), final quorum semantics, and adversary/participation assumptions are fixed and proved.
+
 ## Known critical issues to resolve
 1. Manuscript trust dynamics are not yet a single internally consistent state transition system.
 2. Manuscript PRC description and trust update need to be separated or unified explicitly.
@@ -50,6 +58,7 @@ Core contribution direction: multidimensional trust + predictive influence atten
 5. Current theoretical claims must be weakened or replaced by proofs that follow from explicit assumptions.
 6. Attack terminology must distinguish FDIA/measurement attacks from actual topology manipulation.
 7. Consensus survivability must be defined separately from broad resilience unless a formal resilience definition is introduced.
+8. The final predictive risk law must be specified before the coupled Jacobian can be mapped exactly to code.
 
 ## Rule
 A checklist item is marked complete only after implementation/evidence is verified. No manual headline numbers will be accepted into the final manuscript; results must flow from reproducible experiment artifacts.
