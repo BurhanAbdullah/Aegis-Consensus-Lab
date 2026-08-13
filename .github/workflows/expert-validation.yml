@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - research/v5-expert-validation
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
