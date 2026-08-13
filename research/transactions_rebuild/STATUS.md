@@ -33,6 +33,7 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Complete weighted quorum safety proof under final certificate assumptions
 - [x] Add executable quorum theorem checks
 - [x] Track theorem proof status explicitly
+- [x] Complete interior coupled trust-risk stability theorem
 - [ ] Prove all remaining theorem candidates under final assumptions
 - [ ] Execute tests in runtime
 - [ ] Align production implementation with equations
@@ -60,7 +61,9 @@ The coupled system is treated as a dynamical system rather than a collection of 
 The target operating set remains
 F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=h*}.
 
-The weighted quorum proof is now formalized for fixed governance weights during a certificate context: two q-quorums intersect in weight at least 2q-1; if q>(1+b)/2 this exceeds the maximum Byzantine weight b, forcing positive honest intersection. With honest non-equivocation, conflicting certificates are impossible. Availability is conditional on q<=h. The conservative interval q<=(1-b) is sufficient when h>=1-b, and the resulting sufficient safety/availability interval is nonempty only for b<1/3.
+The weighted quorum proof is formalized for fixed governance weights during a certificate context: two q-quorums intersect in weight at least 2q-1; if q>(1+b)/2 this exceeds the maximum Byzantine weight b, forcing positive honest intersection. With honest non-equivocation, conflicting certificates are impossible. Availability is conditional on q<=h. The conservative interval q<=(1-b) is sufficient when h>=1-b, and the resulting sufficient safety/availability interval is nonempty only for b<1/3.
+
+The interior coupled trust-risk stability theorem is now formalized using the Jacobian and Jury conditions. This does not automatically cover active projection/clipping boundaries or stochastic convergence.
 
 ## Current implementation gate
 The final kernel must be deterministic conditional on scenario inputs. Attack generation and detector noise are external. The production kernel must emit round-level state and certificate traces sufficient to reproduce every paper metric.
