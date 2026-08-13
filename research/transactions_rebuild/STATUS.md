@@ -30,8 +30,10 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Formalize protocol safety assumptions
 - [x] Complete unified reduced mathematical state model
 - [x] Complete predictive risk containment law
-- [ ] Complete weighted quorum proof with final adversary semantics
-- [ ] Prove all theorem candidates under final assumptions
+- [x] Complete weighted quorum safety proof under final certificate assumptions
+- [x] Add executable quorum theorem checks
+- [x] Track theorem proof status explicitly
+- [ ] Prove all remaining theorem candidates under final assumptions
 - [ ] Execute tests in runtime
 - [ ] Align production implementation with equations
 - [ ] Rebuild reproducible experiments
@@ -58,20 +60,19 @@ The coupled system is treated as a dynamical system rather than a collection of 
 The target operating set remains
 F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=h*}.
 
-The weighted certificate semantics are explicit: votes are bound to height/view/phase/proposal context, duplicate validator votes are rejected, certificates require distinct-voter governance weight at least the active quorum weight, and safety is conditional on honest validators not signing conflicting proposals.
+The weighted quorum proof is now formalized for fixed governance weights during a certificate context: two q-quorums intersect in weight at least 2q-1; if q>(1+b)/2 this exceeds the maximum Byzantine weight b, forcing positive honest intersection. With honest non-equivocation, conflicting certificates are impossible. Availability is conditional on q<=h. The conservative interval q<=(1-b) is sufficient when h>=1-b, and the resulting sufficient safety/availability interval is nonempty only for b<1/3.
 
 ## Current implementation gate
 The final kernel must be deterministic conditional on scenario inputs. Attack generation and detector noise are external. The production kernel must emit round-level state and certificate traces sufficient to reproduce every paper metric.
 
 ## Known critical issues to resolve
 1. Full multidimensional trust dynamics still need exact production-to-equation alignment beyond the reduced analytical model.
-2. Weighted quorum proof must be completed under the final adversarial certificate semantics.
+2. Remaining theorem candidates require final assumptions and proof review.
 3. Current production kernel and final manuscript must use the same multidimensional parameterization.
 4. Existing manuscript governance headline results must be regenerated and reconciled against repository CSVs.
-5. Current theoretical claims must be weakened or replaced by proofs that follow from explicit assumptions.
-6. Attack terminology must distinguish FDIA/measurement attacks from actual topology manipulation.
-7. Consensus survivability must be defined separately from broad resilience unless a formal resilience definition is introduced.
-8. Runtime execution of the new kernel/tests has not yet been verified through an execution environment.
+5. Attack terminology must distinguish FDIA/measurement attacks from actual topology manipulation.
+6. Consensus survivability must be defined separately from broad resilience unless a formal resilience definition is introduced.
+7. Runtime execution of the new kernel/tests has not yet been verified through an execution environment.
 
 ## Rule
 A checklist item is marked complete only after implementation/evidence is verified. No manual headline numbers will be accepted into the final manuscript; results must flow from reproducible experiment artifacts.
