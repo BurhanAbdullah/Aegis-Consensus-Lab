@@ -24,12 +24,16 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Define deterministic trace schema
 - [x] Define analytical boundary and validation protocol
 - [x] Define validation gates
+- [x] Implement deterministic reference kernel
+- [x] Implement weighted certificate semantics
+- [x] Add certificate/quorum regression tests
+- [x] Formalize protocol safety assumptions
 - [ ] Complete unified mathematical state model
 - [ ] Complete predictive risk containment law
 - [ ] Complete weighted quorum proof with final adversary semantics
 - [ ] Prove all theorem candidates under final assumptions
-- [ ] Align implementation with equations
-- [ ] Add unit/property tests for final model
+- [ ] Execute tests in runtime
+- [ ] Align production implementation with equations
 - [ ] Rebuild reproducible experiments
 - [ ] Reconcile all manuscript numbers with generated results
 - [ ] Add strong baselines
@@ -52,7 +56,7 @@ Core contribution direction: multidimensional trust + predictive influence atten
 The coupled system is now treated as a dynamical system rather than a collection of independent mechanisms. The target operating set is
 F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=1-b}.
 
-The analytical boundary is still provisional until the risk law, final quorum semantics, and adversary/participation assumptions are fixed and proved.
+The weighted certificate semantics are now explicit: votes are bound to height/view/phase/proposal context, duplicate validator votes are rejected, certificates require distinct-voter governance weight at least the active quorum weight, and safety is conditional on honest validators not signing conflicting proposals.
 
 ## Current implementation gate
 The final kernel must be deterministic conditional on scenario inputs. Attack generation and detector noise are external. The production kernel must emit round-level state and certificate traces sufficient to reproduce every paper metric.
@@ -66,6 +70,7 @@ The final kernel must be deterministic conditional on scenario inputs. Attack ge
 6. Attack terminology must distinguish FDIA/measurement attacks from actual topology manipulation.
 7. Consensus survivability must be defined separately from broad resilience unless a formal resilience definition is introduced.
 8. The final predictive risk law must be specified before the coupled Jacobian can be mapped exactly to code.
+9. Runtime execution of the new kernel/tests has not yet been verified through an execution environment.
 
 ## Rule
 A checklist item is marked complete only after implementation/evidence is verified. No manual headline numbers will be accepted into the final manuscript; results must flow from reproducible experiment artifacts.
