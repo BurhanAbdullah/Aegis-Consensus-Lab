@@ -47,8 +47,13 @@ jobs:
       - name: Run expert audit
         run: python research_validation/audit.py --output research_validation/results
 
+      - name: Run statistical and claim audit
+        run: python research_validation/statistical_claim_audit.py
+
       - name: Show evidence summary
-        run: cat research_validation/results/audit_summary.json
+        run: |
+          cat research_validation/results/audit_summary.json
+          cat research_validation/results/statistical_claim_audit.json
 
       - name: Upload raw evidence and figures
         uses: actions/upload-artifact@v4
