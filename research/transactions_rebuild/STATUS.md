@@ -20,6 +20,10 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Derive candidate availability condition
 - [x] Derive candidate nonempty safety/availability interval
 - [x] Define coupled Jacobian analysis target
+- [x] Define implementation module boundaries
+- [x] Define deterministic trace schema
+- [x] Define analytical boundary and validation protocol
+- [x] Define validation gates
 - [ ] Complete unified mathematical state model
 - [ ] Complete predictive risk containment law
 - [ ] Complete weighted quorum proof with final adversary semantics
@@ -48,7 +52,10 @@ Core contribution direction: multidimensional trust + predictive influence atten
 The coupled system is now treated as a dynamical system rather than a collection of independent mechanisms. The target operating set is
 F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=1-b}.
 
-The analytical boundary is still provisional until the risk law E(tau,R), final quorum semantics, and adversary/participation assumptions are fixed and proved.
+The analytical boundary is still provisional until the risk law, final quorum semantics, and adversary/participation assumptions are fixed and proved.
+
+## Current implementation gate
+The final kernel must be deterministic conditional on scenario inputs. Attack generation and detector noise are external. The production kernel must emit round-level state and certificate traces sufficient to reproduce every paper metric.
 
 ## Known critical issues to resolve
 1. Manuscript trust dynamics are not yet a single internally consistent state transition system.
