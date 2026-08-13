@@ -28,8 +28,8 @@ Rebuild the research artifact and manuscript into a technically defensible IEEE 
 - [x] Implement weighted certificate semantics
 - [x] Add certificate/quorum regression tests
 - [x] Formalize protocol safety assumptions
-- [ ] Complete unified mathematical state model
-- [ ] Complete predictive risk containment law
+- [x] Complete unified reduced mathematical state model
+- [x] Complete predictive risk containment law
 - [ ] Complete weighted quorum proof with final adversary semantics
 - [ ] Prove all theorem candidates under final assumptions
 - [ ] Execute tests in runtime
@@ -53,24 +53,25 @@ Central question: under what conditions can predictive trust adaptation improve 
 Core contribution direction: multidimensional trust + predictive influence attenuation + adaptive weighted quorum + formal equilibrium/stability/quorum-feasibility analysis + empirical phase-boundary validation.
 
 ## Current mathematical gate
-The coupled system is now treated as a dynamical system rather than a collection of independent mechanisms. The target operating set is
-F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=1-b}.
+The coupled system is treated as a dynamical system rather than a collection of independent mechanisms. The reduced analytical state is x=(tau,R), with stationary evidence and drift treated as exogenous inputs. The interior Jacobian and Jury conditions are implemented in `unified_state_model.py`. Risk containment is explicit: `(1-a)e + c d < 1-a` for an interior risk equilibrium, with boundary cases excluded from the interior differentiable theorem.
 
-The weighted certificate semantics are now explicit: votes are bound to height/view/phase/proposal context, duplicate validator votes are rejected, certificates require distinct-voter governance weight at least the active quorum weight, and safety is conditional on honest validators not signing conflicting proposals.
+The target operating set remains
+F={theta: spectral_radius(J(theta))<1 and (1+b)/2<q*(theta)<=h*}.
+
+The weighted certificate semantics are explicit: votes are bound to height/view/phase/proposal context, duplicate validator votes are rejected, certificates require distinct-voter governance weight at least the active quorum weight, and safety is conditional on honest validators not signing conflicting proposals.
 
 ## Current implementation gate
 The final kernel must be deterministic conditional on scenario inputs. Attack generation and detector noise are external. The production kernel must emit round-level state and certificate traces sufficient to reproduce every paper metric.
 
 ## Known critical issues to resolve
-1. Manuscript trust dynamics are not yet a single internally consistent state transition system.
-2. Manuscript PRC description and trust update need to be separated or unified explicitly.
-3. Current code uses a simpler scalar trust/quorum implementation than the manuscript's multidimensional formulation.
+1. Full multidimensional trust dynamics still need exact production-to-equation alignment beyond the reduced analytical model.
+2. Weighted quorum proof must be completed under the final adversarial certificate semantics.
+3. Current production kernel and final manuscript must use the same multidimensional parameterization.
 4. Existing manuscript governance headline results must be regenerated and reconciled against repository CSVs.
 5. Current theoretical claims must be weakened or replaced by proofs that follow from explicit assumptions.
 6. Attack terminology must distinguish FDIA/measurement attacks from actual topology manipulation.
 7. Consensus survivability must be defined separately from broad resilience unless a formal resilience definition is introduced.
-8. The final predictive risk law must be specified before the coupled Jacobian can be mapped exactly to code.
-9. Runtime execution of the new kernel/tests has not yet been verified through an execution environment.
+8. Runtime execution of the new kernel/tests has not yet been verified through an execution environment.
 
 ## Rule
 A checklist item is marked complete only after implementation/evidence is verified. No manual headline numbers will be accepted into the final manuscript; results must flow from reproducible experiment artifacts.
