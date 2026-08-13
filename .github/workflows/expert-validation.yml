@@ -15,7 +15,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,10 +50,21 @@ jobs:
       - name: Run statistical and claim audit
         run: python research_validation/statistical_claim_audit.py
 
+      - name: Run independent theorem audit
+        run: python research_validation/theorem_audit.py
+
+      - name: Gate exact physical-grid claim
+        run: python research_validation/physical_claim_gate.py
+
+      - name: Run Python syntax checks
+        run: python -m compileall -q research_validation
+
       - name: Show evidence summary
         run: |
-          cat research_validation/results/audit_summary.json
-          cat research_validation/results/statistical_claim_audit.json
+          for f in research_validation/results/*.json; do
+            echo "===== $f ====="
+            cat "$f"
+          done
 
       - name: Upload raw evidence and figures
         uses: actions/upload-artifact@v4
