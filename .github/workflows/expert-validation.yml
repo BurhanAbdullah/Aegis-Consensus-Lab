@@ -1,0 +1,56 @@
+name: AEGIS Expert Validation
+
+on:
+  push:
+    branches:
+      - research/v5-expert-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install scientific stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy pandas scipy matplotlib pandapower pypsa
+
+      - name: Environment audit
+        run: |
+          python --version
+          python - <<'PY'
+          import numpy, pandas, scipy, matplotlib
+          import pandapower, pypsa
+          print('numpy', numpy.__version__)
+          print('pandas', pandas.__version__)
+          print('scipy', scipy.__version__)
+          print('matplotlib', matplotlib.__version__)
+          print('pandapower', pandapower.__version__)
+          print('pypsa', getattr(pypsa, '__version__', 'unknown'))
+          PY
+
+      - name: Run expert audit
+        run: python research_validation/audit.py --output research_validation/results
+
+      - name: Show evidence summary
+        run: cat research_validation/results/audit_summary.json
+
+      - name: Upload raw evidence and figures
+        uses: actions/upload-artifact@v4
+        with:
+          name: aegis-expert-validation-${{ github.sha }}
+          path: research_validation/results/
+          if-no-files-found: error
