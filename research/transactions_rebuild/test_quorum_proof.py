@@ -1,5 +1,7 @@
 """Executable checks for the weighted quorum inequalities."""
 
+import math
+
 
 def intersection_lower_bound(q):
     return 2.0 * q - 1.0
@@ -19,8 +21,11 @@ def test_conservative_availability_condition():
 
 
 def test_classical_one_third_boundary():
-    assert (1 + 0.20) / 2 < 1 - 0.20
-    assert not ((1 + 1 / 3) / 2 < 1 - 1 / 3)
+    b = 1 / 3
+    lo = (1 + b) / 2
+    hi = 1 - b
+    assert math.isclose(lo, hi, rel_tol=0.0, abs_tol=1e-15)
+    assert not lo < hi
 
 
 def test_near_boundary_is_not_rounded_into_safety():
