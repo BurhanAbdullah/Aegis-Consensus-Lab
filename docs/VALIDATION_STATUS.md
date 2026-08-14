@@ -1,0 +1,1 @@
+Current status: implementation fixes are on the isolated validation branch. Exact-head CI is still required. No merge, release tag, or submission push is authorized until CI passes.
