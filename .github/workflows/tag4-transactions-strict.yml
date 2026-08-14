@@ -1,0 +1,38 @@
+name: tag4-transactions-strict
+
+on:
+  push:
+    branches: [tag4-transactions-10of10-v10]
+  pull_request:
+    branches: [tag4-transactions-10of10-v10]
+
+jobs:
+  transactions_strict_validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: python -m pip install --upgrade pip pytest numpy
+      - name: Run complete tag4 Transactions tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m pytest -q research/transactions_rebuild
+      - name: Run independent mathematical cross-validation
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.strict_cross_validation
+      - name: Repeat cross-validation for deterministic audit
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: |
+          cp experiments/strict_cross_validation.csv /tmp/strict_cv_1.csv
+          python -m research.transactions_rebuild.benchmarks.strict_cross_validation
+          cmp /tmp/strict_cv_1.csv experiments/strict_cross_validation.csv
+      - name: Verify mathematical artifact
+        run: test -s experiments/strict_cross_validation.csv
+      - name: Record exact head
+        run: git rev-parse HEAD
