@@ -6,7 +6,7 @@ reference-versus-production equivalence tests.
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, Sequence, Tuple
+from typing import Sequence, Tuple
 import numpy as np
 
 
@@ -38,11 +38,13 @@ def quorum_fraction(tau_bar, q0, alpha_q, q_min, q_max):
     return float(np.clip(q0 + alpha_q * (1.0 - tau_bar), q_min, q_max))
 
 
-def governance_state(tau, risk, q0, alpha_q, q_min, q_max, kappa, epsilon=1e-12):
+def governance_state(
+    tau, risk, q0, alpha_q, q_min, q_max, kappa, epsilon=1e-12, g_min=1e-12
+):
     tau = np.asarray(tau, dtype=float)
     risk = np.asarray(risk, dtype=float)
     g = influence(tau, risk, kappa)
-    active = g >= 1e-12
+    active = g >= float(g_min)
     total = float(np.sum(g[active]))
     tau_bar = float(np.sum(g[active] * tau[active]) / max(total, epsilon))
     q = quorum_fraction(tau_bar, q0, alpha_q, q_min, q_max)
@@ -70,11 +72,21 @@ def reference_step(state: ReferenceState, evidence: Sequence[float], drift: Sequ
     risk = np.asarray(state.risk, dtype=float)
     if trust.ndim != 2 or len(E) != len(trust) or len(D) != len(trust):
         raise ValueError("dimension mismatch")
+    if len(W) != trust.shape[1] or not np.isclose(np.sum(W), 1.0, atol=1e-12):
+        raise ValueError("trust weights must match trust dimension and sum to one")
     new_trust = np.vstack([trust_step(t, params.rho, params.ell, e) for t, e in zip(trust, E)])
     new_risk = np.asarray([risk_step(r, e, d, params.risk_memory, params.risk_gain) for r, e, d in zip(risk, E, D)])
     tau = np.asarray([float(np.dot(W, t)) for t in new_trust])
     g, tau_bar, q, total, threshold = governance_state(
-        tau, new_risk, params.q0, params.alpha_q, params.q_min, params.q_max, params.kappa, params.epsilon
+        tau,
+        new_risk,
+        params.q0,
+        params.alpha_q,
+        params.q_min,
+        params.q_max,
+        params.kappa,
+        params.epsilon,
+        params.g_min,
     )
     return {
         "state": ReferenceState(tuple(map(tuple, new_trust)), tuple(new_risk), state.round + 1),
