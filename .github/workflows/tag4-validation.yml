@@ -14,8 +14,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install test dependency
-        run: python -m pip install --upgrade pip pytest
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip pytest numpy
       - name: Run tag4 tests
         working-directory: research/transactions_rebuild
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research/transactions_rebuild
         run: python -m pytest -q
