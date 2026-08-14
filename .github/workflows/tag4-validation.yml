@@ -65,6 +65,7 @@ jobs:
           test -s experiments/localization.csv
           test -s experiments/figures/comparative_attack_phase.pdf
           test -s experiments/figures/component_ablation.pdf
+          test -s experiments/figures/component_ablation_safety.pdf
           test -s experiments/figures/attack_localization.pdf
       - name: Record commit
         run: git rev-parse HEAD
