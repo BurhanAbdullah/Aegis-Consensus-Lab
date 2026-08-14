@@ -63,7 +63,8 @@ jobs:
           test -s experiments/comparative_grid.csv
           test -s experiments/ablation.csv
           test -s experiments/localization.csv
-          test -s experiments/figures/comparative_attack_phase.pdf
+          test -s experiments/figures/comparative_attack_phase_q67.pdf
+          test -s experiments/figures/comparative_attack_phase_q75.pdf
           test -s experiments/figures/component_ablation.pdf
           test -s experiments/figures/component_ablation_safety.pdf
           test -s experiments/figures/attack_localization.pdf
