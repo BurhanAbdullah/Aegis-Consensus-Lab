@@ -1,0 +1,49 @@
+name: tag4-active-validation
+
+on:
+  push:
+    branches:
+      - fix/canonical-validation-active4
+  pull_request:
+    branches:
+      - tag4
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy
+      - name: Run complete test suite
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m pytest -q research/transactions_rebuild
+      - name: Generate canonical benchmark
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.canonical_scenarios
+      - name: Verify benchmark is byte-for-byte deterministic
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: |
+          cp experiments/canonical_scenarios.csv /tmp/canonical_scenarios_1.csv
+          python -m research.transactions_rebuild.benchmarks.canonical_scenarios
+          cmp /tmp/canonical_scenarios_1.csv experiments/canonical_scenarios.csv
+      - name: Run fixed-quorum comparison
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.comparative_reference
+      - name: Record exact validated head
+        run: git rev-parse HEAD
