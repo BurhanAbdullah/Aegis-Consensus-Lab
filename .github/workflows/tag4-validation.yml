@@ -54,6 +54,10 @@ jobs:
           MPLBACKEND: Agg
           PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
         run: python -m research.transactions_rebuild.benchmarks.publication_figures
+      - name: Print experiment summaries
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.experiment_summary
       - name: Verify generated artifacts are non-empty
         run: |
           test -s experiments/comparative_grid.csv
