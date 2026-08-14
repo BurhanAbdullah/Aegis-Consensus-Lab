@@ -9,14 +9,14 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install test dependencies
-        run: python -m pip install --upgrade pip pytest numpy
+        run: python -m pip install --upgrade pip pytest numpy matplotlib
       - name: Run tag4 tests
         env:
           PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
@@ -37,3 +37,30 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
         run: python -m research.transactions_rebuild.benchmarks.analytical_boundary_sweep
+      - name: Run comparative stress grid
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.comparative_grid
+      - name: Run component ablation
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.ablation
+      - name: Run attack localization sweep
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.localization
+      - name: Generate publication figures from frozen CSVs
+        env:
+          MPLBACKEND: Agg
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.publication_figures
+      - name: Verify generated artifacts are non-empty
+        run: |
+          test -s experiments/comparative_grid.csv
+          test -s experiments/ablation.csv
+          test -s experiments/localization.csv
+          test -s experiments/figures/comparative_attack_phase.pdf
+          test -s experiments/figures/component_ablation.pdf
+          test -s experiments/figures/attack_localization.pdf
+      - name: Record commit
+        run: git rev-parse HEAD
