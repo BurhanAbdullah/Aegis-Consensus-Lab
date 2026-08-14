@@ -11,35 +11,44 @@ Rebuild the Aegis research artifact and manuscript into a mathematically rigorou
 - [x] Identify current manuscript/repository consistency risks from prior review.
 - [ ] Freeze final research question.
 - [ ] Freeze exact contribution claims.
-- [ ] Freeze terminology and threat-model scope.
-- [ ] Rebuild the unified cyber-physical + governance mathematical model.
-- [ ] Separate trust state from governance-risk attenuation.
-- [ ] Define multidimensional trust dynamics rigorously.
-- [ ] Define predictive risk containment mathematically.
-- [ ] Define weighted/adaptive quorum mathematically.
-- [ ] Establish trust-state invariance.
-- [ ] Establish equilibrium existence/characterization.
-- [ ] Establish local stability or replace unsupported stability claims.
-- [ ] Derive a defensible governance feasibility/security-availability condition.
-- [ ] Align implementation exactly with the final equations.
-- [ ] Add unit tests for mathematical components.
-- [ ] Freeze experiment configuration and random seeds.
-- [ ] Rebuild detector experiments.
+- [x] Freeze terminology and threat-model scope for the canonical model: weighted certificates, authenticated context, honest non-equivocation; no PBFT/HotStuff theorem claim.
+- [x] Rebuild the unified cyber-physical + governance mathematical reference model.
+- [x] Separate trust state from governance-risk attenuation.
+- [x] Define multidimensional trust dynamics rigorously.
+- [x] Define predictive risk containment mathematically, including the explicit condition under which the unclipped recurrence is valid.
+- [x] Define weighted/adaptive quorum mathematically.
+- [x] Establish trust-state invariance through projection tests.
+- [x] Establish scalar equilibrium existence/characterization and executable closed-form reference.
+- [x] Establish interior local stability through the Jacobian/spectral-radius condition and independent Jury cross-checks.
+- [x] Derive the governance feasibility/security-availability condition and the strict quorum boundary.
+- [x] Align the canonical reference kernel with the frozen equations for the homogeneous-parameter implementation case.
+- [x] Add unit tests for mathematical components.
+- [x] Freeze experiment configuration and random seeds for the six-scenario benchmark.
+- [x] Rebuild deterministic scenario coverage: clean, burst, slow-drift, stealth, equivocation, mixed.
 - [ ] Rebuild localization experiments across multiple attack locations/magnitudes.
-- [ ] Rebuild governance phase-space experiments.
-- [ ] Add strong detection and governance baselines.
+- [x] Add a fixed weighted-quorum reference comparator; it is explicitly not labeled PBFT/HotStuff.
+- [ ] Add stronger governance baselines beyond the fixed-quorum reference.
 - [ ] Add ablation studies.
-- [ ] Add parameter sensitivity studies.
-- [ ] Add uncertainty/confidence intervals.
-- [ ] Generate analytical-vs-empirical phase-boundary figures.
+- [x] Add parameter/boundary sensitivity through the analytical grid sweep.
+- [x] Add seed-level uncertainty infrastructure to the fixed-quorum comparison.
+- [x] Add analytical-vs-kernel phase-boundary cross-validation over 1,911 deterministic parameter cases; exact-boundary cases are reported separately because strict inequalities are numerically sensitive.
+- [ ] Generate final publication-quality analytical-vs-empirical phase-boundary figures.
 - [ ] Resolve every manuscript-vs-repository numerical discrepancy.
-- [ ] Build one-command reproducibility pipeline.
+- [ ] Build one-command reproducibility pipeline that includes the final boundary sweep and manuscript artifacts.
 - [ ] Clean legacy/placeholder research artifacts from the final release path.
 - [ ] Rewrite Methods/Theory/Results around the verified model.
 - [ ] Rewrite Introduction/Related Work/Abstract/Conclusion.
 - [ ] Perform equation, dimensional, statistical, citation, and reproducibility audits.
 - [ ] Perform simulated Transactions Reviewer #1/#2/editor audit.
 - [ ] Mark `tag4` submission-ready only after all gates pass.
+
+## Current verification checkpoint
+
+- Canonical CI on the PR merge ref: **PASS**.
+- Latest verified head: `f8e7f013184472720e3771b2a649f77fc3af998e`.
+- The canonical test suite reported **94 passed, 0 failed** on the latest GitHub Actions validation run.
+- Independent local mathematical cross-checks additionally passed the analytical/Jacobian/Jury/certificate tests and the 1,911-case analytical boundary sweep.
+- The current branch remains a draft validation vehicle and is not merged or submission-ready.
 
 ## Non-negotiable gates
 
