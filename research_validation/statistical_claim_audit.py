@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Independent statistical and claim-consistency audit of archived AEGIS evidence."""
+"""Independent statistical and claim-consistency audit of archived AEGIS evidence.
+
+A mismatch is a submission blocker. This audit must never silently accept
+historical headline numbers when the underlying CSV gives different values.
+"""
 from __future__ import annotations
 
 import json
@@ -21,26 +25,22 @@ def main() -> None:
     m = b.merge(p, on=["slash", "recover"], suffixes=("_baseline", "_predictive"))
     d = (m["successes_predictive"] - m["successes_baseline"]).to_numpy(dtype=float)
 
-    # Paired tests: the 36 phase-space cells are paired observations.
     t = stats.ttest_1samp(d, 0.0)
     nonzero = d[d != 0]
     wilcoxon = stats.wilcoxon(nonzero, alternative="greater", method="auto")
     sign = stats.binomtest(int((d > 0).sum()), int((d != 0).sum()), 0.5, alternative="greater")
 
-    # Deterministic bootstrap CI for the mean paired difference.
     rng = np.random.default_rng(20260813)
     boot = np.empty(50000)
     for i in range(len(boot)):
         boot[i] = rng.choice(d, size=len(d), replace=True).mean()
     ci = np.quantile(boot, [0.025, 0.975])
 
-    # Rank-biserial-style effect summary using the paired sign structure.
     n_pos = int((d > 0).sum())
     n_neg = int((d < 0).sum())
     n_tie = int((d == 0).sum())
     rank_effect = float((n_pos - n_neg) / (n_pos + n_neg))
 
-    # Audit the archived README's headline means against the actual phase-space CSV.
     readme = (root / "archive/final_run/README.md").read_text(encoding="utf-8")
     mb = re.search(r"Baseline mean success:\s*([0-9.]+)", readme)
     mp = re.search(r"Predictive mean success:\s*([0-9.]+)", readme)
@@ -49,7 +49,6 @@ def main() -> None:
     actual_b = float(m["successes_baseline"].mean())
     actual_p = float(m["successes_predictive"].mean())
 
-    # Solver results from the first audit are independently classified here.
     solver = json.loads((out / "solver_check.json").read_text(encoding="utf-8"))
     solver_flags = []
     for case in solver.get("cases", []):
@@ -59,6 +58,12 @@ def main() -> None:
         if case["max_line_loading_pct"] > 100.0:
             flags.append("line_loading_above_100_percent")
         solver_flags.append({"case": case["case"], "flags": flags})
+
+    mismatch = bool(
+        claimed_b is not None
+        and claimed_p is not None
+        and (abs(actual_b - claimed_b) > 1e-9 or abs(actual_p - claimed_p) > 1e-9)
+    )
 
     report = {
         "phase_space": {
@@ -83,13 +88,15 @@ def main() -> None:
             "phase_space_csv_predictive_mean": actual_p,
             "baseline_absolute_difference": None if claimed_b is None else actual_b - claimed_b,
             "predictive_absolute_difference": None if claimed_p is None else actual_p - claimed_p,
-            "status": "MISMATCH" if (claimed_b is not None and claimed_p is not None and (abs(actual_b-claimed_b) > 1e-9 or abs(actual_p-claimed_p) > 1e-9)) else "MATCH_OR_UNAVAILABLE",
+            "status": "MISMATCH" if mismatch else "MATCH_OR_UNAVAILABLE",
         },
         "solver_operational_flags": solver_flags,
     }
 
     (out / "statistical_claim_audit.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
+    if mismatch:
+        raise SystemExit("Submission blocker: archived headline means do not match recomputed CSV means.")
 
 
 if __name__ == "__main__":
