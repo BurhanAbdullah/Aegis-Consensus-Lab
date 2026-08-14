@@ -9,6 +9,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,3 +21,19 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
         run: python -m pytest -q research/transactions_rebuild
+      - name: Generate canonical six-scenario benchmark twice
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: |
+          python -m research.transactions_rebuild.benchmarks.canonical_scenarios
+          cp experiments/canonical_scenarios.csv /tmp/canonical_scenarios_1.csv
+          python -m research.transactions_rebuild.benchmarks.canonical_scenarios
+          cmp /tmp/canonical_scenarios_1.csv experiments/canonical_scenarios.csv
+      - name: Run fixed-quorum reference comparison
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.comparative_reference
+      - name: Run analytical boundary sweep
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.analytical_boundary_sweep
