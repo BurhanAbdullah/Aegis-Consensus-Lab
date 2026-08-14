@@ -25,33 +25,52 @@ Rebuild the Aegis research artifact and manuscript into a mathematically rigorou
 - [x] Add unit tests for mathematical components.
 - [x] Freeze experiment configuration and random seeds for the six-scenario benchmark.
 - [x] Rebuild deterministic scenario coverage: clean, burst, slow-drift, stealth, equivocation, mixed.
-- [ ] Rebuild localization experiments across multiple attack locations/magnitudes.
+- [x] Rebuild localization experiments across four attack locations and five magnitudes/four drift levels.
 - [x] Add a fixed weighted-quorum reference comparator; it is explicitly not labeled PBFT/HotStuff.
 - [ ] Add stronger governance baselines beyond the fixed-quorum reference.
-- [ ] Add ablation studies.
+- [x] Add ablation studies.
 - [x] Add parameter/boundary sensitivity through the analytical grid sweep.
 - [x] Add seed-level uncertainty infrastructure to the fixed-quorum comparison.
 - [x] Add analytical-vs-kernel phase-boundary cross-validation over 1,911 deterministic parameter cases; exact-boundary cases are reported separately because strict inequalities are numerically sensitive.
-- [ ] Generate final publication-quality analytical-vs-empirical phase-boundary figures.
+- [x] Generate final publication-quality comparative, ablation, safety-boundary, and localization figures from frozen CSV artifacts.
 - [ ] Resolve every manuscript-vs-repository numerical discrepancy.
-- [ ] Build one-command reproducibility pipeline that includes the final boundary sweep and manuscript artifacts.
+- [x] Build one-command reproducibility pipeline for all current experiments and figures.
 - [ ] Clean legacy/placeholder research artifacts from the final release path.
 - [ ] Rewrite Methods/Theory/Results around the verified model.
 - [ ] Rewrite Introduction/Related Work/Abstract/Conclusion.
 - [ ] Perform equation, dimensional, statistical, citation, and reproducibility audits.
 - [ ] Perform simulated Transactions Reviewer #1/#2/editor audit.
-- [ ] Mark `tag4` submission-ready only after all gates pass.
+- [ ] Mark `tag4` submission-ready only after all manuscript gates pass.
 
 ## Current verification checkpoint
 
-- Canonical PR CI on the merge ref: **PASS**.
-- Latest validated branch head: `d577b3079885c708fcbc3efb060462ff00b8e449`.
-- Latest GitHub Actions run validated the full canonical test suite, the deterministic six-scenario benchmark, the fixed-quorum comparator, and the analytical boundary sweep.
-- The immediately preceding full test run reported **95 passed, 0 failed**; the final CI run also completed successfully.
-- The canonical benchmark contains 6 scenarios × 10 seeds × 30 rounds = **1,800 rows** and is byte-for-byte deterministic across repeated generation.
-- The analytical boundary sweep contains **1,911 cases**; independent local execution found maximum equilibrium error below `1.2e-14`, maximum quorum error below `2.4e-15`, and zero analytical/empirical classification mismatches away from strict numerical boundary cases. There were 33 grid points within the explicit boundary tolerance and those are not silently classified as exact interior points.
-- Exhaustive discrete quorum adversarial tests confirm the strict boundary: equality can admit conflicting certificates, while thresholds strictly above `(1+b)/2` eliminate the tested conflicting pairs under honest non-equivocation.
-- The current branch remains a draft validation vehicle and is **not merged, tagged, or submission-ready**.
+- Latest full PR validation run: **PASS** on merge ref `378c6d018e1eb49dbe4774d1cc322a8fad006e1c`.
+- Latest validation reported **102 passed, 0 failed**.
+- Canonical benchmark: 6 scenarios × 10 seeds × 30 rounds = **1,800 deterministic rows**, byte-for-byte identical across repeated generation.
+- Analytical boundary sweep: **1,911 cases**, maximum equilibrium error `1.1768e-14`, maximum quorum error `2.3315e-15`, zero classification mismatches away from strict numerical boundary cases, with 33 explicit boundary-near cases.
+- Comparative stress grid: **4,200 rows**, covering all 14 single/pair/triple attack sets × 6 evidence levels × 5 drift levels × 10 seeds. Mean AEGIS-minus-fixed attack finalization difference = **0.05345** (95% CI approximately 0.05018–0.05672); the two-validator attack stratum gives **0.12472** (95% CI approximately 0.11845–0.13099). Single- and triple-validator strata are zero in this configuration, so the claim must be limited to the operational two-validator boundary regime rather than generalized to every attack size.
+- Ablation: 50 rows. Availability varies materially by component; the full model gives 0.857 attack-period finalization, while removing predictive attenuation falls to 0.571. The analytical certificate-boundary metric is also tracked, preventing an ablation from being judged by availability alone.
+- Localization: 800 rows across four validator locations, five evidence magnitudes, four drift levels, and ten seeds. Risk activation is ~0.986 across locations, while influence reduction differs by location (approximately A 0.573, B 0.556, C 0.538, D 0.521 mean drop), giving a location-sensitive output rather than only a binary detector rate.
+- Publication artifacts are generated successfully as PDF/PNG from the experiment CSVs: comparative phase figure, component availability ablation, component safety-boundary ablation, and attack-localization influence figure.
+- The validation pipeline is now green, but the PR remains a **draft validation vehicle** and is not merged or submission-ready.
+
+## Scientific interpretation guardrails
+
+1. The strong comparative result is specifically an availability result under the tested two-validator commit-withholding regime. It is not a blanket resilience claim.
+2. The fixed-quorum comparator is a mathematical reference policy, not PBFT/HotStuff.
+3. The safety result must be stated through the explicit certificate-boundary condition `q > (1+b)/2` under the stated honest non-equivocation assumptions.
+4. The six nominal scenarios alone do not establish superiority; the stress grid and ablations are required evidence.
+5. The localization experiment demonstrates state/influence response across locations; it does not by itself prove attack attribution accuracy.
+6. Every headline paper number must be regenerated from the frozen repository artifacts before submission.
+
+## Remaining hard blockers
+
+1. **Manuscript reconciliation:** the repository currently does not contain the final manuscript source needed to reconcile every paper number, equation reference, figure, and claim.
+2. **Final contribution freeze:** exact claims must be fixed only after manuscript reconciliation.
+3. **Additional governance baseline:** add at least one stronger non-fixed-quorum reference before making broad comparative claims.
+4. **Final statistical audit:** choose the final reported estimands, confidence intervals, and multiple-comparison treatment before writing Results.
+5. **Transactions reviewer audit:** perform the final theorem-assumption, threat-model, novelty, citation, and claim-strength audit on the actual manuscript.
+6. **Release cleanup:** remove or quarantine legacy/placeholder artifacts and freeze the exact submission commit.
 
 ## Non-negotiable gates
 
