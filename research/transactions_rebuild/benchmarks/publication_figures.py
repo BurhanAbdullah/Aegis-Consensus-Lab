@@ -25,8 +25,8 @@ def comparative_heatmap():
     vals /= n
     fig, ax = plt.subplots(figsize=(6.6, 4.8)); im = ax.imshow(vals, origin="lower", aspect="auto")
     ax.set_xticks(range(len(e_levels)), [f"{x:.2f}" for x in e_levels]); ax.set_yticks(range(len(counts)), counts)
-    ax.set_xlabel("Attack evidence"); ax.set_ylabel("Number of compromised validators")
-    ax.set_title("AEGIS minus fixed-quorum attack finalization rate"); fig.colorbar(im, ax=ax, label="Rate difference"); save(fig, "comparative_attack_phase")
+    ax.set_xlabel("Attack evidence"); ax.set_ylabel("Number of compromised validators"); ax.set_title("AEGIS minus fixed-quorum attack finalization rate")
+    fig.colorbar(im, ax=ax, label="Rate difference"); save(fig, "comparative_attack_phase")
 
 
 def ablation_bar():
@@ -52,12 +52,12 @@ def localization_heatmap():
     vals = np.zeros((len(locations), len(magnitudes))); counts = np.zeros_like(vals)
     for r in rows:
         i, j = locations.index(r["location"]), magnitudes.index(float(r["magnitude"]))
-        vals[i, j] += float(r["risk_activation_rate"]); counts[i, j] += 1
+        vals[i, j] += float(r["influence_drop"]); counts[i, j] += 1
     vals /= counts
-    fig, ax = plt.subplots(figsize=(6.4, 4.4)); im = ax.imshow(vals, origin="lower", aspect="auto", vmin=0, vmax=1)
+    fig, ax = plt.subplots(figsize=(6.4, 4.4)); im = ax.imshow(vals, origin="lower", aspect="auto")
     ax.set_xticks(range(len(magnitudes)), [f"{x:.2f}" for x in magnitudes]); ax.set_yticks(range(len(locations)), locations)
-    ax.set_xlabel("Attack evidence magnitude"); ax.set_ylabel("Attacked validator"); ax.set_title("Localization: attack-period risk activation")
-    fig.colorbar(im, ax=ax, label="Activation rate"); save(fig, "attack_localization")
+    ax.set_xlabel("Attack evidence magnitude"); ax.set_ylabel("Attacked validator"); ax.set_title("Localization: influence reduction under attack")
+    fig.colorbar(im, ax=ax, label="Influence drop"); save(fig, "attack_localization")
 
 
 if __name__ == "__main__":
