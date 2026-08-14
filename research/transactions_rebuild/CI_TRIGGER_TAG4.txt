@@ -1,1 +1,0 @@
-tag4 CI trigger: run the validation suite against the current branch head after the package/import, quorum-boundary, and reference-equivalence test fixes. This file is intentionally empty of scientific content and exists only to force a fresh push-triggered validation run.
