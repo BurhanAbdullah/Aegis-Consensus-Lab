@@ -44,11 +44,14 @@ Rebuild the Aegis research artifact and manuscript into a mathematically rigorou
 
 ## Current verification checkpoint
 
-- Canonical CI on the PR merge ref: **PASS**.
-- Latest verified head: `f8e7f013184472720e3771b2a649f77fc3af998e`.
-- The canonical test suite reported **94 passed, 0 failed** on the latest GitHub Actions validation run.
-- Independent local mathematical cross-checks additionally passed the analytical/Jacobian/Jury/certificate tests and the 1,911-case analytical boundary sweep.
-- The current branch remains a draft validation vehicle and is not merged or submission-ready.
+- Canonical PR CI on the merge ref: **PASS**.
+- Latest validated branch head: `d577b3079885c708fcbc3efb060462ff00b8e449`.
+- Latest GitHub Actions run validated the full canonical test suite, the deterministic six-scenario benchmark, the fixed-quorum comparator, and the analytical boundary sweep.
+- The immediately preceding full test run reported **95 passed, 0 failed**; the final CI run also completed successfully.
+- The canonical benchmark contains 6 scenarios × 10 seeds × 30 rounds = **1,800 rows** and is byte-for-byte deterministic across repeated generation.
+- The analytical boundary sweep contains **1,911 cases**; independent local execution found maximum equilibrium error below `1.2e-14`, maximum quorum error below `2.4e-15`, and zero analytical/empirical classification mismatches away from strict numerical boundary cases. There were 33 grid points within the explicit boundary tolerance and those are not silently classified as exact interior points.
+- Exhaustive discrete quorum adversarial tests confirm the strict boundary: equality can admit conflicting certificates, while thresholds strictly above `(1+b)/2` eliminate the tested conflicting pairs under honest non-equivocation.
+- The current branch remains a draft validation vehicle and is **not merged, tagged, or submission-ready**.
 
 ## Non-negotiable gates
 
