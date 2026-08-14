@@ -1,8 +1,9 @@
 """Pre-registered comparative stress grid for AEGIS versus fixed quorum.
 
-The grid is not tuned to a single attack. It sweeps attack location, evidence
-magnitude, drift magnitude, and seed while using identical traces for both
-policies. Results are written as machine-readable CSV artifacts.
+The grid sweeps attack location, evidence magnitude, drift magnitude, and seed.
+During the attack the compromised validator withholds its commit vote; both
+policies receive the identical trace. Evidence/drift control trust and risk,
+not the attack label itself.
 """
 from __future__ import annotations
 
@@ -26,10 +27,8 @@ ATTACK_END = 18
 
 def make_kernel(params: Params | None = None) -> AegisKernel:
     return AegisKernel([
-        ValidatorState("A", [0.90] * 4),
-        ValidatorState("B", [0.88] * 4),
-        ValidatorState("C", [0.86] * 4),
-        ValidatorState("D", [0.84] * 4),
+        ValidatorState("A", [0.90] * 4), ValidatorState("B", [0.88] * 4),
+        ValidatorState("C", [0.86] * 4), ValidatorState("D", [0.84] * 4),
     ], params=params or Params())
 
 
@@ -46,11 +45,11 @@ def run_trace(location: str, evidence_level: float, drift_level: float, seed: in
         e = {v: max(0.0, min(1.0, 0.02 + noise)) for v in VALIDATORS}
         d = {v: 0.0 for v in VALIDATORS}
         attacked = ATTACK_START <= r <= ATTACK_END
-        if attacked:
-            e[location] = evidence_level
-            d[location] = drift_level
-            attack_rounds += 1
         commit = {v: True for v in VALIDATORS}
+        if attacked:
+            e[location], d[location] = evidence_level, drift_level
+            commit[location] = False
+            attack_rounds += 1
         trace = k.step(e, d, {v: True for v in VALIDATORS}, commit,
                         height=1, view=r, proposal_id=f"grid-{location}-{seed}-{evidence_level}-{drift_level}")
         fixed_threshold = FIXED_Q * trace.total_weight
@@ -63,40 +62,27 @@ def run_trace(location: str, evidence_level: float, drift_level: float, seed: in
             aegis_attack_final += int(trace.finalized)
             fixed_attack_final += int(fixed_finalized)
     return {
-        "location": location,
-        "evidence": evidence_level,
-        "drift": drift_level,
-        "seed": seed,
+        "location": location, "evidence": evidence_level, "drift": drift_level, "seed": seed,
         "aegis_attack_finalization_rate": aegis_attack_final / attack_rounds,
         "fixed_attack_finalization_rate": fixed_attack_final / attack_rounds,
         "aegis_overall_finalization_rate": aegis_all_final / ROUNDS,
         "fixed_overall_finalization_rate": fixed_all_final / ROUNDS,
         "attack_finalization_difference": (aegis_attack_final - fixed_attack_final) / attack_rounds,
-        "mean_aegis_margin": mean(margins_aegis),
-        "mean_fixed_margin": mean(margins_fixed),
+        "mean_aegis_margin": mean(margins_aegis), "mean_fixed_margin": mean(margins_fixed),
     }
 
 
 def run_grid() -> list[dict]:
-    rows = []
-    for location in ATTACK_LOCATIONS:
-        for e in EVIDENCE_LEVELS:
-            for d in DRIFT_LEVELS:
-                for seed in SEEDS:
-                    rows.append(run_trace(location, e, d, seed))
-    return rows
+    return [run_trace(location, e, d, seed)
+            for location in ATTACK_LOCATIONS for e in EVIDENCE_LEVELS
+            for d in DRIFT_LEVELS for seed in SEEDS]
 
 
 def write_csv(rows: list[dict], path: str | Path = "experiments/comparative_grid.csv") -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]))
-        w.writeheader()
-        w.writerows(rows)
+        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 
 
 if __name__ == "__main__":
-    rows = run_grid()
-    write_csv(rows)
-    print(f"wrote experiments/comparative_grid.csv ({len(rows)} rows)")
+    rows = run_grid(); write_csv(rows); print(f"wrote experiments/comparative_grid.csv ({len(rows)} rows)")
