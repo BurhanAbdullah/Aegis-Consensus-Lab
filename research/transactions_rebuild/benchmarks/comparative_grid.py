@@ -57,7 +57,7 @@ def run_trace(location: str, evidence_level: float, drift_level: float, seed: in
         fixed_finalized = trace.commit_weight >= fixed_threshold
         aegis_all_final += int(trace.finalized)
         fixed_all_final += int(fixed_finalized)
-        margins_aegis.append(trace.quorum_margin)
+        margins_aegis.append(trace.commit_weight - trace.quorum_weight)
         margins_fixed.append(trace.commit_weight - fixed_threshold)
         if attacked:
             aegis_attack_final += int(trace.finalized)
