@@ -1,13 +1,17 @@
 """Deterministic AEGIS tag4 reference kernel.
 
-This kernel is intentionally scenario-driven: attack generation and detector
-noise are supplied by the caller. The protocol state transition itself has no
-internal randomness.
+The kernel is deterministic conditional on scenario inputs. Certificate
+finalization is delegated to the canonical weighted certificate semantics;
+attack generation and detector noise remain external inputs.
 """
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Iterable, List
 import math
+try:
+    from .certificates import Vote, certificate
+except ImportError:
+    from certificates import Vote, certificate
 
 
 def clip01(x: float) -> float:
@@ -59,6 +63,8 @@ class RoundTrace:
     prepare_weight: float = 0.0
     commit_weight: float = 0.0
     finalized: bool = False
+    certificate_weight: float = 0.0
+    certificate_voters: tuple[str, ...] = ()
 
 
 class AegisKernel:
@@ -74,42 +80,41 @@ class AegisKernel:
         self.p = params
         self.round = 0
 
-    def step(self, evidence: Dict[str, float], drift: Dict[str, float], prepare: Dict[str, bool] | None = None, commit: Dict[str, bool] | None = None) -> RoundTrace:
+    def step(
+        self,
+        evidence: Dict[str, float],
+        drift: Dict[str, float],
+        prepare: Dict[str, bool] | None = None,
+        commit: Dict[str, bool] | None = None,
+        *,
+        height: int = 0,
+        view: int = 0,
+        proposal_id: str = "proposal",
+    ) -> RoundTrace:
         prepare = prepare or {}
         commit = commit or {}
-        tau_before = {v.validator_id: v.tau(self.weights) for v in self.validators}
 
         for v in self.validators:
             e = clip01(evidence.get(v.validator_id, 0.0))
             d = clip01(drift.get(v.validator_id, 0.0))
-            v.trust = [
-                clip01(t + self.p.rho * (1.0 - t) - self.p.ell * e * t)
-                for t in v.trust
-            ]
-            v.risk = clip01(
-                self.p.risk_memory * v.risk
-                + (1.0 - self.p.risk_memory) * e
-                + self.p.risk_gain * d
-            )
+            v.trust = [clip01(t + self.p.rho * (1.0 - t) - self.p.ell * e * t) for t in v.trust]
+            v.risk = clip01(self.p.risk_memory * v.risk + (1.0 - self.p.risk_memory) * e + self.p.risk_gain * d)
 
         tau = {v.validator_id: v.tau(self.weights) for v in self.validators}
-        influence = {
-            v.validator_id: tau[v.validator_id] * clip01(1.0 - self.p.kappa * v.risk)
-            for v in self.validators
-        }
+        influence = {v.validator_id: tau[v.validator_id] * clip01(1.0 - self.p.kappa * v.risk) for v in self.validators}
         active = {v.validator_id: g >= self.p.g_min for v, g in [(v, influence[v.validator_id]) for v in self.validators]}
         total = sum(g for vid, g in influence.items() if active[vid])
-        tau_bar = (
-            sum(influence[vid] * tau[vid] for vid in influence if active[vid]) / max(total, self.p.epsilon)
-        )
+        tau_bar = sum(influence[vid] * tau[vid] for vid in influence if active[vid]) / max(total, self.p.epsilon)
         q = min(self.p.q_max, max(self.p.q_min, self.p.q0 + self.p.alpha_q * (1.0 - tau_bar)))
         threshold = q * total
 
         prep_weight = sum(influence[v.validator_id] for v in self.validators if prepare.get(v.validator_id, False) and active[v.validator_id])
-        commit_weight = sum(influence[v.validator_id] for v in self.validators if commit.get(v.validator_id, False) and active[v.validator_id])
+        commit_votes = [Vote(v.validator_id, height, view, "commit", proposal_id, influence[v.validator_id]) for v in self.validators if commit.get(v.validator_id, False) and active[v.validator_id]]
+        cert = certificate(commit_votes, threshold) if total > self.p.epsilon else None
+        commit_weight = sum(v.weight for v in commit_votes)
 
         self.round += 1
-        trace = RoundTrace(
+        return RoundTrace(
             round=self.round,
             evidence={k: clip01(x) for k, x in evidence.items()},
             drift={k: clip01(x) for k, x in drift.items()},
@@ -122,6 +127,7 @@ class AegisKernel:
             quorum_weight=threshold,
             prepare_weight=prep_weight,
             commit_weight=commit_weight,
-            finalized=commit_weight >= threshold and total > self.p.epsilon,
+            finalized=cert is not None,
+            certificate_weight=0.0 if cert is None else cert.weight,
+            certificate_voters=() if cert is None else cert.voters,
         )
-        return trace
