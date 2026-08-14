@@ -15,7 +15,7 @@ def _validators():
 
 
 def _assert_close(a, b, tol=1e-12):
-    np.testing.assert_allclose(np.asarray(a, dtype=float), np.asarray(b, dtype=float), rtol=0.0, atol=tol)
+    np.testing.assert_allclose(np.asarray(list(a), dtype=float), np.asarray(b, dtype=float), rtol=0.0, atol=tol)
 
 
 def test_reference_matches_kernel_across_deterministic_trace():
