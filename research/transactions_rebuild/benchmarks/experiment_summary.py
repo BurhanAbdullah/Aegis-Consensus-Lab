@@ -17,13 +17,14 @@ def ci95(xs):
 
 
 if __name__ == "__main__":
-    comp = rows("experiments/comparative_grid.csv"); diffs = [float(r["attack_finalization_difference"]) for r in comp]
-    print("COMPARATIVE_GRID rows", len(comp)); print("COMPARATIVE_GRID difference mean_ci95", ci95(diffs))
-    print("COMPARATIVE_GRID nonzero differences", sum(abs(x) > 1e-12 for x in diffs))
-    print("COMPARATIVE_GRID positive AEGIS differences", sum(x > 1e-12 for x in diffs)); print("COMPARATIVE_GRID negative AEGIS differences", sum(x < -1e-12 for x in diffs))
-    for count in sorted({int(r["attack_count"]) for r in comp}):
-        xs = [float(r["attack_finalization_difference"]) for r in comp if int(r["attack_count"]) == count]
-        print("COMPARATIVE_GRID attack_count", count, ci95(xs))
+    comp = rows("experiments/comparative_grid.csv")
+    print("COMPARATIVE_GRID rows", len(comp))
+    for field in ("aegis_minus_q67_difference", "aegis_minus_q75_difference"):
+        diffs = [float(r[field]) for r in comp]
+        print("COMPARATIVE_GRID", field, "mean_ci95", ci95(diffs), "positive", sum(x > 1e-12 for x in diffs), "negative", sum(x < -1e-12 for x in diffs))
+        for count in sorted({int(r["attack_count"]) for r in comp}):
+            xs = [float(r[field]) for r in comp if int(r["attack_count"]) == count]
+            print("COMPARATIVE_GRID", field, "attack_count", count, ci95(xs))
 
     abl = rows("experiments/ablation.csv")
     for variant in sorted({r["variant"] for r in abl}):
