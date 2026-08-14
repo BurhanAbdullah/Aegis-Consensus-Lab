@@ -1,0 +1,1 @@
+The validation branch is intentionally not release-ready until exact-head GitHub Actions validation is green. Missing CI is a hard NOT VERIFIED state.
