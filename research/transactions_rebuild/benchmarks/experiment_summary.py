@@ -17,12 +17,10 @@ def ci95(xs):
 
 
 if __name__ == "__main__":
-    comp = rows("experiments/comparative_grid.csv")
-    diffs = [float(r["attack_finalization_difference"]) for r in comp]
+    comp = rows("experiments/comparative_grid.csv"); diffs = [float(r["attack_finalization_difference"]) for r in comp]
     print("COMPARATIVE_GRID rows", len(comp)); print("COMPARATIVE_GRID difference mean_ci95", ci95(diffs))
     print("COMPARATIVE_GRID nonzero differences", sum(abs(x) > 1e-12 for x in diffs))
-    print("COMPARATIVE_GRID positive AEGIS differences", sum(x > 1e-12 for x in diffs))
-    print("COMPARATIVE_GRID negative AEGIS differences", sum(x < -1e-12 for x in diffs))
+    print("COMPARATIVE_GRID positive AEGIS differences", sum(x > 1e-12 for x in diffs)); print("COMPARATIVE_GRID negative AEGIS differences", sum(x < -1e-12 for x in diffs))
     for count in sorted({int(r["attack_count"]) for r in comp}):
         xs = [float(r["attack_finalization_difference"]) for r in comp if int(r["attack_count"]) == count]
         print("COMPARATIVE_GRID attack_count", count, ci95(xs))
@@ -36,5 +34,6 @@ if __name__ == "__main__":
 
     loc = rows("experiments/localization.csv")
     for v in sorted({r["location"] for r in loc}):
-        xs = [float(r["risk_activation_rate"]) for r in loc if r["location"] == v]
-        print("LOCALIZATION", v, ci95(xs))
+        risk = [float(r["risk_activation_rate"]) for r in loc if r["location"] == v]
+        drop = [float(r["influence_drop"]) for r in loc if r["location"] == v]
+        print("LOCALIZATION", v, "risk_activation_ci95", ci95(risk), "influence_drop_ci95", ci95(drop))
