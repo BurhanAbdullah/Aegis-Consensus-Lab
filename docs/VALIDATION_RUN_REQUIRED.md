@@ -1,0 +1,1 @@
+The validation branch must be tested against its exact head through GitHub Actions before any merge or release action.
