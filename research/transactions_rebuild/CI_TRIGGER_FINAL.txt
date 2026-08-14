@@ -1,1 +1,0 @@
-Final tag4 runtime validation trigger after canonical model, full Jacobian, observable D, and certificate-finalization integration.
