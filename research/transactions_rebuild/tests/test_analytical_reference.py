@@ -8,7 +8,7 @@ from research.transactions_rebuild.analytical_reference import (
     trust_equilibrium,
     trust_multiplier,
 )
-from research.transactions_rebuild.kernel.tag4_kernel import AegisKernel, ValidatorState
+from research.transactions_rebuild.kernel.tag4_kernel import AegisKernel, Params, ValidatorState
 
 
 def test_safety_and_availability_interval_is_nonempty_only_below_one_third_byzantine_weight():
@@ -23,7 +23,7 @@ def test_safety_and_availability_interval_is_nonempty_only_below_one_third_byzan
 def test_closed_form_equilibrium_matches_kernel_limit():
     rho, ell, e = 0.10, 0.20, 0.30
     expected = trust_equilibrium(rho, ell, e)
-    k = AegisKernel([ValidatorState("A", [0.20] * 4)])
+    k = AegisKernel([ValidatorState("A", [0.20] * 4)], params=Params(rho=rho, ell=ell))
     for _ in range(300):
         k.step({"A": e}, {"A": 0.0}, {"A": True}, {"A": True})
     tau = k.validators[0].tau(k.weights)
@@ -33,17 +33,14 @@ def test_closed_form_equilibrium_matches_kernel_limit():
 def test_kernel_local_multiplier_matches_analytical_multiplier():
     rho, ell, e = 0.11, 0.19, 0.22
     beta = trust_multiplier(rho, ell, e)
-    k = AegisKernel([ValidatorState("A", [0.51] * 4)])
+    equilibrium = trust_equilibrium(rho, ell, e)
+    k = AegisKernel([ValidatorState("A", [0.51] * 4)], params=Params(rho=rho, ell=ell))
     k.step({"A": e}, {"A": 0.0}, {"A": True}, {"A": True})
     k.step({"A": e}, {"A": 0.0}, {"A": True}, {"A": True})
     x0 = k.validators[0].trust[0]
     k.step({"A": e}, {"A": 0.0}, {"A": True}, {"A": True})
     x1 = k.validators[0].trust[0]
-    assert math.isclose((x1 - expected_equilibrium(rho, ell, e)) / (x0 - expected_equilibrium(rho, ell, e)), beta, rel_tol=1e-8, abs_tol=1e-8)
-
-
-def expected_equilibrium(rho, ell, e):
-    return rho / (rho + ell * e)
+    assert math.isclose((x1 - equilibrium) / (x0 - equilibrium), beta, rel_tol=1e-8, abs_tol=1e-8)
 
 
 def test_reference_parameter_classification_has_both_sides_of_safety_boundary():
