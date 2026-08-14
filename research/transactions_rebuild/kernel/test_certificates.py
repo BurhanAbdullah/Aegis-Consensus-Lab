@@ -1,4 +1,4 @@
-from certificates import (
+from transactions_rebuild.kernel.certificates import (
     Vote, certificate, conflicting_certificates,
     weighted_intersection_lower_bound, safety_condition,
     availability_condition, feasible_interval,
