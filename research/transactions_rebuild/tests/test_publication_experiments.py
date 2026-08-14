@@ -1,12 +1,13 @@
 from research.transactions_rebuild.benchmarks.comparative_grid import (
-    ATTACK_LOCATIONS, DRIFT_LEVELS, EVIDENCE_LEVELS, SEEDS,
+    ATTACK_SETS, DRIFT_LEVELS, EVIDENCE_LEVELS, SEEDS,
 )
 from research.transactions_rebuild.benchmarks.ablation import VARIANTS
 from research.transactions_rebuild.benchmarks.localization import MAGNITUDES, DRIFTS, VALIDATORS
 
 
 def test_comparative_grid_cardinality():
-    assert len(ATTACK_LOCATIONS) * len(DRIFT_LEVELS) * len(EVIDENCE_LEVELS) * len(SEEDS) == 4 * 5 * 6 * 10
+    assert len(ATTACK_SETS) == 14
+    assert len(ATTACK_SETS) * len(DRIFT_LEVELS) * len(EVIDENCE_LEVELS) * len(SEEDS) == 14 * 5 * 6 * 10
 
 
 def test_ablation_cardinality():
