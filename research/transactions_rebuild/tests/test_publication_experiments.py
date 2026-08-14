@@ -1,8 +1,8 @@
-from __future__ import annotations
-
-from ..benchmarks.comparative_grid import ATTACK_LOCATIONS, DRIFT_LEVELS, EVIDENCE_LEVELS, SEEDS
-from ..benchmarks.ablation import VARIANTS
-from ..benchmarks.localization import MAGNITUDES, DRIFTS, VALIDATORS
+from research.transactions_rebuild.benchmarks.comparative_grid import (
+    ATTACK_LOCATIONS, DRIFT_LEVELS, EVIDENCE_LEVELS, SEEDS,
+)
+from research.transactions_rebuild.benchmarks.ablation import VARIANTS
+from research.transactions_rebuild.benchmarks.localization import MAGNITUDES, DRIFTS, VALIDATORS
 
 
 def test_comparative_grid_cardinality():
