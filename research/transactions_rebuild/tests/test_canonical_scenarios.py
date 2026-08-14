@@ -27,9 +27,11 @@ def test_metrics_are_finite_and_bounded():
         assert row["quorum_margin"] == row["quorum_margin"]
 
 
-def test_equivocation_does_not_create_a_certificate_from_missing_vote():
+def test_equivocation_scenario_uses_certificate_semantics():
     rows = [r for r in run_all() if r["scenario"] == "equivocation"]
-    # Four honest/Byzantine votes are not assumed to be interchangeable here;
-    # the scenario deliberately removes one commit vote. The certificate layer
-    # must remain the authority for finalization, not a raw vote count.
+    # The scenario removes one commit vote. Finalization is therefore decided
+    # by the canonical weighted-certificate rule, not by a raw vote count.
+    # The test checks that the benchmark remains deterministic and bounded;
+    # certificate safety itself is tested exhaustively in the certificate suite.
+    assert len(rows) == len(SEEDS) * 30
     assert all(r["finalized"] in (0, 1) for r in rows)
