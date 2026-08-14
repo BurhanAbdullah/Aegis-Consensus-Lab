@@ -78,18 +78,16 @@ def test_trust_equilibrium_matches_scalar_reference_case():
 
 
 def test_stability_boundary_is_strict():
-    # Scalar reference: |1-rho-ell*e| < 1 is required.
     rho, ell, e = 0.1, 0.2, 0.5
     beta = 1.0 - rho - ell * e
     assert abs(beta) < 1.0
-    # Exact lower boundary rho+ell*e=0 is not admissible for asymptotic stability.
     assert not (0.0 < 0.0 < 2.0)
 
 
 def test_quorum_boundary_is_strict():
     b = 0.20
     q_boundary = (1.0 + b) / 2.0
-    assert weighted_intersection_lower_bound(q_boundary) == b
+    assert math.isclose(weighted_intersection_lower_bound(q_boundary), b, rel_tol=0.0, abs_tol=1e-12)
     assert not safety_condition(q_boundary, b)
     assert safety_condition(q_boundary + 1e-6, b)
 
@@ -100,7 +98,6 @@ def test_certificate_threshold_matches_kernel_quorum():
 
 
 def test_six_scenario_classes_are_representable_without_randomness():
-    # These are deterministic scenario inputs, not stochastic attack claims.
     scenarios = {
         "clean": 0.0,
         "burst": 1.0,
