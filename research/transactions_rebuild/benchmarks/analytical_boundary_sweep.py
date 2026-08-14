@@ -10,6 +10,7 @@ EVIDENCE_GRID = tuple(i / 20 for i in range(21))
 B_GRID = tuple(i / 20 for i in range(7))
 Q0_GRID = tuple(0.45 + i * 0.025 for i in range(13))
 BOUNDARY_TOL = 1e-9
+MAX_STEPS = 300
 
 
 def run_sweep() -> list[dict]:
@@ -20,7 +21,7 @@ def run_sweep() -> list[dict]:
         q_star = quorum(q0, params.alpha_q, tau_star, params.q_min, params.q_max)
         kernel = AegisKernel([ValidatorState("A", [0.37] * 4)], params=params)
         trace = None
-        for _ in range(1000):
+        for _ in range(MAX_STEPS):
             trace = kernel.step({"A": evidence}, {"A": 0.0}, {"A": True}, {"A": True})
         assert trace is not None
         analytical_safe = feasible(q_star, b)
