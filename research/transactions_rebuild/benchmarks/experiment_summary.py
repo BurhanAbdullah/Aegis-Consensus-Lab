@@ -7,24 +7,34 @@ from math import sqrt
 
 
 def rows(path):
-    with Path(path).open(encoding="utf-8", newline="") as f: return list(csv.DictReader(f))
+    with Path(path).open(encoding="utf-8", newline="") as f:
+        return list(csv.DictReader(f))
 
 
 def ci95(xs):
     m = mean(xs)
-    if len(xs) < 2: return m, m, m
-    h = 1.96 * stdev(xs) / sqrt(len(xs)); return m, m - h, m + h
+    if len(xs) < 2:
+        return m, m, m
+    h = 1.96 * stdev(xs) / sqrt(len(xs))
+    return m, m - h, m + h
+
+
+def report_difference(comp, field, label):
+    diffs = [float(r[field]) for r in comp]
+    print(label, "difference_mean_ci95", ci95(diffs))
+    print(label, "nonzero", sum(abs(x) > 1e-12 for x in diffs))
+    print(label, "positive_AEGIS", sum(x > 1e-12 for x in diffs))
+    print(label, "negative_AEGIS", sum(x < -1e-12 for x in diffs))
+    for count in sorted({int(r["attack_count"]) for r in comp}):
+        xs = [float(r[field]) for r in comp if int(r["attack_count"]) == count]
+        print(label, "attack_count", count, ci95(xs))
 
 
 if __name__ == "__main__":
     comp = rows("experiments/comparative_grid.csv")
     print("COMPARATIVE_GRID rows", len(comp))
-    for field in ("aegis_minus_q67_difference", "aegis_minus_q75_difference"):
-        diffs = [float(r[field]) for r in comp]
-        print("COMPARATIVE_GRID", field, "mean_ci95", ci95(diffs), "positive", sum(x > 1e-12 for x in diffs), "negative", sum(x < -1e-12 for x in diffs))
-        for count in sorted({int(r["attack_count"]) for r in comp}):
-            xs = [float(r[field]) for r in comp if int(r["attack_count"]) == count]
-            print("COMPARATIVE_GRID", field, "attack_count", count, ci95(xs))
+    report_difference(comp, "aegis_minus_q67_difference", "COMPARATIVE_GRID q=0.67")
+    report_difference(comp, "aegis_minus_q75_difference", "COMPARATIVE_GRID q=0.75")
 
     abl = rows("experiments/ablation.csv")
     for variant in sorted({r["variant"] for r in abl}):
