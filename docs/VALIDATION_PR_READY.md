@@ -1,0 +1,1 @@
+This branch is ready for CI validation only; release remains blocked until exact-head green status is observed.
