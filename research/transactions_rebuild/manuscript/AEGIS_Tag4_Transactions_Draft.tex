@@ -1,0 +1,150 @@
+\documentclass[10pt,journal]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{url}
+
+\title{Predictive Trust-Weighted Byzantine Consensus for Cyber-Physical Data Integrity}
+\author{Burhan Abdullah}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper develops a deterministic mathematical model for adaptive trust-weighted Byzantine consensus under degraded cyber-physical observations. The model couples multidimensional validator trust, observable detector evidence, temporal drift, predictive risk, governance influence, and an adaptive quorum. The analysis separates the interior differentiable dynamics from projection boundaries and gives an exact full Jacobian for the canonical state transition. Weighted certificate safety is derived from quorum intersection, while availability is expressed through honest participating governance weight. The resulting operating region is defined jointly by local dynamical stability and the security--availability inequalities. The implementation is deterministic conditional on scenario inputs and exposes the detector-to-risk interface without using attack ground truth. Unsupported physical-system validation claims are deliberately excluded from the present manuscript.
+\end{abstract}
+
+\section{Introduction}
+Cyber-physical consensus operates under a different failure environment from an idealized distributed ledger. Measurements may drift, detector outputs may be uncertain, communication may degrade, and a subset of validators may behave Byzantine. A fixed quorum can remain safe while becoming unavailable, whereas an aggressive adaptive rule can preserve progress while weakening safety. The central problem is therefore to characterize the joint security--availability operating region of an adaptive consensus mechanism.
+
+The contribution here is theory-first. The protocol is represented by an explicit state transition rather than by independent heuristics. The state, detector interface, certificate semantics, equilibrium, Jacobian, and quorum conditions are specified in a common model. Claims that require stochastic convergence, topology manipulation, or physical testbed evidence are not inferred from simulation alone.
+
+\section{Canonical Model}
+For validator $i$, let $T_{i,k}\in[0,1]^m$ denote the trust vector and let $w\ge0$, $\mathbf{1}^Tw=1$. The aggregate trust is
+\begin{equation}
+\tau_{i,k}=w^TT_{i,k}.
+\end{equation}
+The predictive risk state is $R_{i,k}\in[0,1]$.
+
+The trust transition is
+\begin{equation}
+T_{i,k+1}=\Pi_{[0,1]^m}\left[T_{i,k}+\rho_i(1-T_{i,k})-\ell_iE_{i,k}T_{i,k}\right],
+\end{equation}
+where $E_{i,k}$ is normalized validated detector evidence. Recovery is controlled by $\rho_i$ and evidence-driven degradation by $\ell_i$.
+
+The risk transition is
+\begin{equation}
+R_{i,k+1}=\Pi_{[0,1]}\left[a_iR_{i,k}+(1-a_i)E_{i,k}+c_iD_{i,k}\right],
+\end{equation}
+with $0\le a_i<1$.
+
+\subsection{Observable detector interface}
+The normalized detector vector is
+\begin{equation}
+d_{i,k}=(d^N_{i,k},d^C_{i,k},d^J_{i,k},d^R_{i,k})\in[0,1]^4,
+\end{equation}
+corresponding to NIS, CUSUM, Jacobian-precursor, and temporal-risk channels. For $k\ge1$, temporal drift is defined only from consecutive observations:
+\begin{equation}
+D_{i,k}=\Pi_{[0,1]}\left(\frac{\|d_{i,k}-d_{i,k-1}\|_2}{2}\right).
+\end{equation}
+The factor $2=\sqrt{4}$ is the maximum Euclidean distance in the unit four-dimensional cube. No attack label is used in this quantity.
+
+For detector channels $s^j$ with positive thresholds $h_j$,
+\begin{equation}
+d^j_{i,k}=\Pi_{[0,1]}\left(\frac{\max(s^j_{i,k},0)}{h_j}\right),
+\end{equation}
+and
+\begin{equation}
+E_{i,k}=\Pi_{[0,1]}\left(\sum_j\omega_jd^j_{i,k}\right),\qquad \omega_j\ge0,\quad\sum_j\omega_j=1.
+\end{equation}
+
+\section{Governance and Certificates}
+Governance influence is
+\begin{equation}
+G_{i,k}=\tau_{i,k}\Pi_{[0,1]}(1-\kappa R_{i,k}).
+\end{equation}
+The active set contains validators with $G_{i,k}\ge g_{\min}$ and total governance weight $W_k$. The adaptive quorum fraction is
+\begin{equation}
+q_k=\Pi_{[q_{\min},q_{\max}]}
+\left(q_0+\alpha_q(1-\bar\tau_k)\right),
+\end{equation}
+where
+\begin{equation}
+\bar\tau_k=\frac{\sum_iG_{i,k}\tau_{i,k}}{\max(W_k,\varepsilon)}.
+\end{equation}
+The certificate threshold is $Q_k=q_kW_k$.
+
+A certificate contains authenticated votes for one common $(h,v,\text{phase},\text{proposal})$ context, with at most one vote per validator. Finalization is granted only when the certificate constructor accepts the vote set. Thus finalization is a consequence of certificate semantics, not a second independent threshold calculation.
+
+\section{Equilibrium and Stability}
+For fixed exogenous evidence $E_i=E$ and drift $D_i=D$, the unclipped trust equilibrium is
+\begin{equation}
+\tau^*=\frac{\rho}{\rho+\ell E},
+\end{equation}
+when the denominator is positive. The risk equilibrium is
+\begin{equation}
+R^*=\frac{(1-a)E+cD}{1-a}.
+\end{equation}
+The latter is an admissible interior equilibrium only if
+\begin{equation}
+(1-a)E+cD\le1-a.
+\end{equation}
+This is the risk-containment condition.
+
+For the full state $x=(T_1,\ldots,T_m,R)^T$, the interior Jacobian is
+\begin{equation}
+J=\operatorname{diag}(\beta I_m,a),\qquad
+\beta=1-\rho-\ell E.
+\end{equation}
+Therefore
+\begin{equation}
+\rho(J)=\max\{|1-\rho-\ell E|,|a|\}.
+\end{equation}
+The interior equilibrium is locally asymptotically stable if and only if
+\begin{equation}
+|1-\rho-\ell E|<1,\qquad 0\le a<1.
+\end{equation}
+This result is conditional on exogenous detector inputs. If detector dynamics are made endogenous, their states and derivatives must be appended to the Jacobian.
+
+For a two-state coupled reduction $x=(\bar\tau,R)^T$, the Schur stability test is equivalently expressed through the Jury inequalities
+\begin{align}
+1-\operatorname{tr}(J)+\det(J)&>0,\\
+1+\operatorname{tr}(J)+\det(J)&>0,\\
+1-\det(J)&>0.
+\end{align}
+
+\section{Security--Availability Region}
+Let Byzantine governance weight be bounded by $b$ and honest participating weight by $h$. Two quorums of fraction $q$ intersect in weight at least $2q-1$. Under honest non-equivocation, safety follows when
+\begin{equation}
+q>\frac{1+b}{2}.
+\end{equation}
+Availability requires
+\begin{equation}
+q\le h.
+\end{equation}
+A conservative sufficient condition is $q\le1-b$ when $h\ge1-b$. The nonempty sufficient interval
+\begin{equation}
+\frac{1+b}{2}<q\le1-b
+\end{equation}
+exists only for $b<1/3$.
+
+The central analytical object is therefore
+\begin{equation}
+\mathcal F=\{\theta:\rho(J_F(\theta))<1,\;
+(1+b)/2<q^*(\theta)\le h^*\}.
+\end{equation}
+The paper treats this set as a security--availability boundary rather than reducing performance to a single accuracy statistic.
+
+\section{Validation Protocol}
+The reference implementation is deterministic conditional on scenario inputs. The validation suite checks domain invariance, deterministic replay, equilibrium fixed points, analytical Jacobians against finite differences, full-state spectral-radius identities, observable-drift normalization, risk-containment boundaries, weighted-certificate semantics, quorum intersection, and certificate-driven finalization.
+
+The experimental protocol requires common scenario seeds across baselines and the full model. Required attack families include burst injection, slow drift, stealth, equivocation, mixed attacks, and participation degradation. Primary empirical metrics include safety violation rate, finalization rate, false acceptance, false rejection, detection latency, quorum margins, recovery time, and computational overhead.
+
+No claim of an independently reproduced 9,450-case physical validation set is made here because the raw trace bundle needed for independent reproduction is not present in the canonical rebuild. Such evidence must be added before a physical-system validation claim is promoted.
+
+\section{Limitations}
+The present stability theorem is an interior, deterministic-input result. Projection boundaries, endogenous detector dynamics, asynchronous liveness, stochastic convergence, and physical testbed validation require separate evidence. The manuscript consequently does not claim results beyond the implemented mathematical assumptions.
+
+\section{Conclusion}
+The rebuild gives AEGIS a single mathematical contract connecting detector observables, trust, predictive risk, governance influence, quorum selection, and certificate finalization. The full Jacobian and explicit risk-containment condition remove two previously ambiguous parts of the model. The resulting security--availability region can be evaluated analytically and then tested independently with seeded experiments.
+
+\end{document}
