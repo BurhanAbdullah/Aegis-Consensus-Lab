@@ -1,15 +1,13 @@
 """Fair comparison against a fixed weighted-quorum reference.
 
-This is deliberately named a *fixed-quorum reference*, not PBFT or HotStuff.
-It uses the same seeded scenario traces and rounds as the canonical benchmark.
-External protocol claims require separate implementations and are not inferred
-from this comparator.
+This comparator intentionally uses the same seeded scenario traces as the
+canonical benchmark. It is a fixed-quorum reference, not PBFT or HotStuff.
 """
 from __future__ import annotations
 
-import random
 from math import sqrt
 from statistics import mean, stdev
+
 from .canonical_scenarios import SCENARIOS, SEEDS, make_kernel, scenario_input
 
 FIXED_Q = 0.67
@@ -17,10 +15,11 @@ Z95 = 1.96
 
 
 def run_compare(rounds: int = 30) -> list[dict]:
-    out = []
+    out: list[dict] = []
     for seed in SEEDS:
         for scenario in SCENARIOS:
             kernel = make_kernel()
+            import random
             rng = random.Random(seed)
             for k in range(rounds):
                 e, d, attacked = scenario_input(scenario, k, rng)
@@ -28,7 +27,8 @@ def run_compare(rounds: int = 30) -> list[dict]:
                 if scenario == "equivocation" and attacked:
                     commit["C"] = False
                 trace = kernel.step(
-                    e, d,
+                    e,
+                    d,
                     {v: True for v in "ABCD"},
                     commit,
                     height=1,
