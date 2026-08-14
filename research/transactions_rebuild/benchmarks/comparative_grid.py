@@ -1,14 +1,14 @@
 """Pre-registered comparative stress grid for AEGIS versus fixed quorum.
 
-The grid sweeps attack location, evidence magnitude, drift magnitude, and seed.
-During the attack the compromised validator withholds its commit vote; both
-policies receive the identical trace. Evidence/drift control trust and risk,
-not the attack label itself.
+Both policies receive identical traces. The sweep covers single, pair, and
+triple compromised-validator sets, evidence magnitude, drift magnitude, and
+10 deterministic seeds. Compromised validators withhold commit votes.
 """
 from __future__ import annotations
 
 import csv
 import random
+from itertools import combinations
 from pathlib import Path
 from statistics import mean
 
@@ -16,9 +16,9 @@ from ..kernel.tag4_kernel import AegisKernel, Params, ValidatorState
 
 SEEDS = (11, 23, 37, 41, 59, 71, 83, 97, 101, 113)
 VALIDATORS = ("A", "B", "C", "D")
+ATTACK_SETS = tuple(combinations(VALIDATORS, r) for r in (1, 2, 3))
 EVIDENCE_LEVELS = (0.20, 0.35, 0.50, 0.65, 0.80, 0.95)
 DRIFT_LEVELS = (0.00, 0.10, 0.25, 0.50, 0.75)
-ATTACK_LOCATIONS = VALIDATORS
 FIXED_Q = 0.67
 ROUNDS = 30
 ATTACK_START = 5
@@ -32,14 +32,10 @@ def make_kernel(params: Params | None = None) -> AegisKernel:
     ], params=params or Params())
 
 
-def run_trace(location: str, evidence_level: float, drift_level: float, seed: int, params: Params | None = None):
-    k = make_kernel(params)
-    rng = random.Random(seed)
-    aegis_attack_final = fixed_attack_final = 0
-    aegis_all_final = fixed_all_final = 0
-    margins_aegis = []
-    margins_fixed = []
-    attack_rounds = 0
+def run_trace(attack_set, evidence_level: float, drift_level: float, seed: int, params: Params | None = None):
+    k = make_kernel(params); rng = random.Random(seed)
+    aegis_attack_final = fixed_attack_final = 0; aegis_all_final = fixed_all_final = 0
+    margins_aegis = []; margins_fixed = []; attack_rounds = 0
     for r in range(ROUNDS):
         noise = rng.uniform(-0.01, 0.01)
         e = {v: max(0.0, min(1.0, 0.02 + noise)) for v in VALIDATORS}
@@ -47,22 +43,21 @@ def run_trace(location: str, evidence_level: float, drift_level: float, seed: in
         attacked = ATTACK_START <= r <= ATTACK_END
         commit = {v: True for v in VALIDATORS}
         if attacked:
-            e[location], d[location] = evidence_level, drift_level
-            commit[location] = False
+            for v in attack_set:
+                e[v], d[v], commit[v] = evidence_level, drift_level, False
             attack_rounds += 1
         trace = k.step(e, d, {v: True for v in VALIDATORS}, commit,
-                        height=1, view=r, proposal_id=f"grid-{location}-{seed}-{evidence_level}-{drift_level}")
+                        height=1, view=r, proposal_id=f"grid-{''.join(attack_set)}-{seed}-{evidence_level}-{drift_level}")
         fixed_threshold = FIXED_Q * trace.total_weight
         fixed_finalized = trace.commit_weight >= fixed_threshold
-        aegis_all_final += int(trace.finalized)
-        fixed_all_final += int(fixed_finalized)
+        aegis_all_final += int(trace.finalized); fixed_all_final += int(fixed_finalized)
         margins_aegis.append(trace.commit_weight - trace.quorum_weight)
         margins_fixed.append(trace.commit_weight - fixed_threshold)
         if attacked:
-            aegis_attack_final += int(trace.finalized)
-            fixed_attack_final += int(fixed_finalized)
+            aegis_attack_final += int(trace.finalized); fixed_attack_final += int(fixed_finalized)
     return {
-        "location": location, "evidence": evidence_level, "drift": drift_level, "seed": seed,
+        "attack_set": "+".join(attack_set), "attack_count": len(attack_set),
+        "evidence": evidence_level, "drift": drift_level, "seed": seed,
         "aegis_attack_finalization_rate": aegis_attack_final / attack_rounds,
         "fixed_attack_finalization_rate": fixed_attack_final / attack_rounds,
         "aegis_overall_finalization_rate": aegis_all_final / ROUNDS,
@@ -73,9 +68,7 @@ def run_trace(location: str, evidence_level: float, drift_level: float, seed: in
 
 
 def run_grid() -> list[dict]:
-    return [run_trace(location, e, d, seed)
-            for location in ATTACK_LOCATIONS for e in EVIDENCE_LEVELS
-            for d in DRIFT_LEVELS for seed in SEEDS]
+    return [run_trace(a, e, d, s) for a in ATTACK_SETS for e in EVIDENCE_LEVELS for d in DRIFT_LEVELS for s in SEEDS]
 
 
 def write_csv(rows: list[dict], path: str | Path = "experiments/comparative_grid.csv") -> None:
