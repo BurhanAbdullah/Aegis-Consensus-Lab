@@ -1,0 +1,24 @@
+from __future__ import annotations
+
+from ..benchmarks.comparative_grid import ATTACK_LOCATIONS, DRIFT_LEVELS, EVIDENCE_LEVELS, SEEDS
+from ..benchmarks.ablation import VARIANTS
+from ..benchmarks.localization import MAGNITUDES, DRIFTS, VALIDATORS
+
+
+def test_comparative_grid_cardinality():
+    assert len(ATTACK_LOCATIONS) * len(DRIFT_LEVELS) * len(EVIDENCE_LEVELS) * len(SEEDS) == 4 * 5 * 6 * 10
+
+
+def test_ablation_cardinality():
+    assert len(VARIANTS) == 5
+
+
+def test_localization_cardinality():
+    assert len(VALIDATORS) * len(MAGNITUDES) * len(DRIFTS) * len(SEEDS) == 4 * 5 * 4 * 10
+
+
+def test_experiment_ranges():
+    assert all(0.0 <= x <= 1.0 for x in EVIDENCE_LEVELS)
+    assert all(0.0 <= x <= 1.0 for x in DRIFT_LEVELS)
+    assert all(0.0 <= x <= 1.0 for x in MAGNITUDES)
+    assert all(0.0 <= x <= 1.0 for x in DRIFTS)
