@@ -1,49 +1,54 @@
 # Code-to-Model Audit v1 — tag4
 
 ## Canonical implementation decision
-The existing `core/consensus.sh` is legacy scalar-trust code and is not mathematically equivalent to the multidimensional AEGIS design. The v5-style implementation is the closest existing prototype, but it also uses heuristic risk and quorum laws. Neither is promoted as the final Transactions implementation.
+`research/transactions_rebuild/FINAL_MODEL_SPEC_v2.md` is the canonical mathematical specification. `research/transactions_rebuild/kernel/tag4_kernel.py` is the deterministic executable reference for that specification. The legacy shell simulators (`core/consensus_v4.sh` and `archive/final_run/consensus_v4.sh`) are historical artifacts and are **not** used as evidence for canonical-model theorem or performance claims.
+
+The canonical kernel is deterministic conditional on explicit scenario inputs. Attack generation and detector noise are external to the kernel. Detector evidence and observable temporal drift are implemented separately in `detector_evidence.py`.
 
 ## Mismatch ledger
 
-| Model object | Existing implementation | Required tag4 form | Disposition |
+| Model object | Historical implementation | Canonical tag4 form | Disposition |
 |---|---|---|---|
-| Trust state T_i | crypto/behavior/latency/sensor | bounded vector T_i | retain concept; formalize update |
-| Effective trust | fixed 0.40/0.30/0.15/0.15 weighted sum | w^T T_i | retain weights initially; expose as parameters |
-| Evidence e_i | implicit/random events | explicit normalized detector evidence | replace |
-| Risk R_i | integer heuristic from confidence delta/oscillation/latency | explicit state/function E(T,R) | replace |
-| Influence G_i | 15% hard attenuation when R>15 | tau_i phi(R_i) | replace |
-| Quorum q | safety heuristic 50%..66% | q0 + alpha_q(1-tau_bar), clipped | replace |
-| Primary | highest effective trust | highest governance weight, tie-broken deterministically | retain with deterministic tie break |
-| Recovery | fixed +6 behavior per round | rho recovery map | replace |
-| Slashing | fixed -35 behavior | explicit degradation term ell e T | replace |
-| Randomness | shell RANDOM in dynamics | seeded/exogenous scenario process | remove from core dynamics |
-| Finalization | weighted threshold | formal certificate semantics | redesign |
+| Trust state `T_i` | crypto/behavior/latency/sensor shell fields | bounded vector `T_i in [0,1]^m` | canonical kernel |
+| Effective trust | fixed shell weighted sum | `tau_i=w^T T_i` | canonical kernel |
+| Evidence `E_i` | implicit/random shell events | normalized detector evidence | canonical `detector_evidence.py` |
+| Drift `D_i` | shell-local/random state | observable normalized detector-score drift | canonical `detector_evidence.py` |
+| Risk `R_i` | integer heuristic | bounded recurrence `aR+(1-a)E+cD` | canonical kernel |
+| Influence `G_i` | hard 15% attenuation | `tau_i clip(1-kappa R_i)` | canonical kernel |
+| Quorum `q` | shell heuristic | clipped adaptive law from `tau_bar` | canonical kernel |
+| Primary selection | highest shell trust | not used as a theorem primitive | historical only |
+| Recovery/slashing | fixed shell `+6/-35` | explicit `rho/ell` recurrence | canonical kernel |
+| Randomness | shell `RANDOM` inside dynamics | external deterministic scenario inputs | removed from canonical path |
+| Finalization | shell weighted threshold | context-bound weighted certificate semantics | canonical certificate kernel |
 
-## Critical findings
-1. Existing v5 risk is not differentiable as written because it is integer-valued, thresholded, and partly based on state that is not persistently updated (`PREV_CONFIDENCE` is initialized per run).
-2. The existing safety estimate uses confidence >=55 as a proxy for honesty; this is not a Byzantine ground-truth variable and cannot appear as a theorem assumption without explicit interpretation.
-3. The current quorum is capped at 66%, which conflicts with the general weighted safety condition when adversarial weight b requires q>(1+b)/2. The final controller must expose q_max and report infeasible states.
-4. Existing trust updates are per-dimension and asymmetric; the final paper must state whether the model is a vector recurrence or a scalar aggregate recurrence.
-5. Random Byzantine events inside the protocol executable mix the stochastic attack generator with the protocol dynamics. These must be separated for reproducible experiments.
-6. The old scalar implementation has a fixed 2/3 quorum and therefore cannot be used to validate the adaptive-quorum theorem.
+## Critical findings and resolution
 
-## Refactor target
-Implement one deterministic protocol kernel driven by an explicit scenario input. Attack generation, detector evidence, trust dynamics, governance weighting, quorum calculation, and PBFT certificate verification must be separate modules.
+1. The old v4/v5 shell risk was non-differentiable and mixed stochastic attack generation with protocol dynamics. **Resolved for canonical evidence:** the submission reference is now the deterministic Python kernel; shell output remains historical only.
+2. The old shell `CONFIDENCE >= 55` proxy for honesty is not a theorem variable. **Resolved by separation:** adversarial ground truth is an experiment input; confidence is not used as a theorem assumption in the canonical kernel.
+3. The old shell quorum cap was not a general safety theorem. **Resolved in the canonical model:** the admissible safety/availability inequalities are explicit and strict; feasibility is tested independently.
+4. The canonical state is explicitly `(T_i,R_i)` and detector evidence/drift are exogenous inputs. **Resolved.** If evidence becomes endogenous, its state must be appended before differentiating.
+5. Random attack generation is external to the canonical protocol kernel. **Resolved.**
+6. Certificate semantics are context-bound and reject duplicate voters, context mismatches, and insufficient weight. **Resolved and tested.**
 
-The protocol kernel must emit a machine-readable trace containing at least:
+## Canonical trace contract
+
+The executable reference records, per round:
+
 - round
 - validator
 - trust vector
 - aggregate trust
 - evidence
+- observable drift
 - risk
-- governance weight
-- total active weight
+- governance influence
+- total active governance weight
 - quorum fraction
 - quorum weight
 - prepare weight
-- commit weight
+- commit/certificate weight
 - finalization outcome
-- adversarial ground truth
 
-The experiment runner, not the protocol kernel, controls random seeds and attack schedules.
+## Historical evidence rule
+
+Historical simulator outputs are retained unchanged for auditability. They may be used only when explicitly labeled historical. Submission numerical claims must be regenerated from canonical inputs and the deterministic kernel. A disagreement between a historical artifact and canonical CSV-derived evidence must remain visible in the audit ledger; it must never be silently overwritten.
