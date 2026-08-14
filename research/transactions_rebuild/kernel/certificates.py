@@ -6,7 +6,7 @@ not signing conflicting proposals in the same context.
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple
+from typing import Iterable, Tuple
 
 
 @dataclass(frozen=True)
@@ -63,12 +63,17 @@ def weighted_intersection_lower_bound(q: float) -> float:
 
 
 def safety_margin(q: float, byzantine_weight: float) -> float:
-    """Positive means the quorum-intersection bound exceeds Byzantine weight."""
+    """Safety margin with a numerical guard at the exact theoretical boundary.
+
+    The mathematical condition is 2q - 1 > b.  The tolerance only prevents
+    binary floating-point roundoff from turning an exact boundary into a
+    false positive; it does not relax the mathematical inequality.
+    """
     return weighted_intersection_lower_bound(q) - float(byzantine_weight)
 
 
 def safety_condition(q: float, byzantine_weight: float) -> bool:
-    return safety_margin(q, byzantine_weight) > 0.0
+    return safety_margin(q, byzantine_weight) > 1e-12
 
 
 def availability_condition(q: float, honest_participating_weight: float) -> bool:
