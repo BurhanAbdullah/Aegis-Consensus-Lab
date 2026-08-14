@@ -1,0 +1,1 @@
+Validation scope is frozen to the canonical Python kernel, six explicit scenarios, ten fixed seeds, thirty rounds per case, repeated deterministic execution, and a fixed weighted-quorum reference comparator. Named PBFT/HotStuff comparisons and physical 9,450-case claims remain excluded unless independently reproduced with raw evidence.
