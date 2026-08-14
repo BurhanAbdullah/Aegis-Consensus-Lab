@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Gate the previously reported cyber-physical claims against actual artifacts.
+"""Gate cyber-physical claims against the exact underlying artifacts.
 
-This does not fabricate an AC result. It marks the claim VERIFIED only when
-all required raw evidence for the claimed AEGIS closed-loop experiment exists.
+This gate never fabricates or substitutes generic power-flow results for the
+claimed AEGIS closed-loop experiment. Missing raw evidence is a hard failure.
 """
 from __future__ import annotations
+
 import json
 from pathlib import Path
 
@@ -26,10 +27,13 @@ result = {
     "required_artifacts": exists,
     "status": "VERIFIED" if complete else "NOT_VERIFIED",
     "reason": (
-        "All exact experiment artifacts are present; numerical recomputation is required before final verification."
+        "All exact experiment artifacts are present; numerical recomputation is still required before final verification."
         if complete else
         "The repository does not contain the complete exact raw experiment/controller evidence required to verify the claim."
     ),
 }
 (OUT / "physical_claim_gate.json").write_text(json.dumps(result, indent=2))
 print(json.dumps(result, indent=2))
+
+if not complete:
+    raise SystemExit("Submission blocker: exact physical-grid evidence is incomplete.")
