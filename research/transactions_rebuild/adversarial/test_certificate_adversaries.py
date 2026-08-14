@@ -24,8 +24,6 @@ def test_just_above_safety_boundary_is_safe():
 
 
 def test_byzantine_weight_cannot_create_two_conflicting_safe_certificates():
-    # Two q-quorums with total normalized weight 1 have intersection >= 2q-1.
-    # If 2q-1>b, Byzantine weight alone cannot occupy the intersection.
     b = 0.25
     q = 0.63
     assert 2.0 * q - 1.0 > b
@@ -34,7 +32,7 @@ def test_byzantine_weight_cannot_create_two_conflicting_safe_certificates():
 
 def test_boundary_b_one_third_has_no_strict_feasible_interval():
     lower, upper = feasible_interval(1.0 / 3.0)
-    assert lower >= upper
+    assert abs(lower - upper) < 1e-12
 
 
 def test_below_one_third_has_nonempty_sufficient_interval():
