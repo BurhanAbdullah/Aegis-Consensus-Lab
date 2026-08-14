@@ -2,11 +2,11 @@
 
 ## Scope
 
-This document records conclusions from the reproducibility audit of the frozen `archive/final_run` evidence. It intentionally distinguishes direct evidence, independent numerical validation, and claims that require a separate mathematical-model implementation.
+This document records conclusions from the reproducibility audit of the frozen `archive/final_run` evidence and the canonical tag4 mathematical implementation. It distinguishes historical evidence, independent numerical validation, and claims that remain unsupported.
 
-## 1. Phase-space experiment
+## 1. Historical phase-space experiment
 
-The archived experiment contains 36 `(slash, recover)` cells. Direct recomputation from `phase_space_baseline.csv` and `phase_space_predictive.csv` gives:
+The archived experiment contains 36 `(slash, recover)` cells. Direct recomputation from the archived phase-space CSVs gives:
 
 | Metric | Baseline | Predictive | Paired difference |
 |---|---:|---:|---:|
@@ -14,34 +14,57 @@ The archived experiment contains 36 `(slash, recover)` cells. Direct recomputati
 
 Predictive containment wins 20 cells, loses 15, and ties 1. The paired difference ranges from -76 to +58, with SD 29.86.
 
-The current statistical audit runs a paired t-test, Wilcoxon signed-rank test, exact sign test, and deterministic bootstrap confidence interval. The paired t-test and Wilcoxon test are not significant at the 0.05 level. Accordingly, the experiment should be described as **phase-dependent restructuring of the success landscape**, not as universal predictive improvement.
+The paired t-test and Wilcoxon test are not significant at the 0.05 level. The correct description is **phase-dependent restructuring of the success landscape**, not universal predictive improvement.
 
 ## 2. Historical README inconsistency
 
-The archived `archive/final_run/README.md` reports baseline/predictive means of 143.14 and 115.03. Those values do not match the means obtained by recomputing the archived 36-cell CSVs. The audit therefore marks those README values as stale metadata and uses the CSV-derived values for quantitative conclusions.
+The archived `archive/final_run/README.md` reports baseline/predictive means of 143.14 and 115.03. Those values do not match the means obtained by recomputing the archived 36-cell CSVs. Those README values remain preserved as stale historical metadata. The CSV-derived values remain canonical for the archived experiment.
 
-The frozen archive is not silently rewritten.
+No historical artifact is silently rewritten.
 
-## 3. Recovery Elasticity Ratio Λ
+## 3. Canonical recurrence and code mapping
+
+The repository now contains an explicit canonical mathematical specification in `research/transactions_rebuild/FINAL_MODEL_SPEC_v2.md` and a deterministic reference implementation in `research/transactions_rebuild/kernel/tag4_kernel.py`.
+
+The canonical implementation explicitly separates:
+
+- bounded trust vector `T`;
+- aggregate trust `tau`;
+- validated detector evidence `E`;
+- observable detector drift `D`;
+- predictive risk `R`;
+- governance influence `G`;
+- adaptive quorum `q`;
+- context-bound weighted certificates.
+
+Attack generation and detector noise are external scenario inputs. The legacy shell simulator remains historical and is not used to establish canonical mathematical claims.
+
+For fixed exogenous `E,D`, the implementation matches the stated trust/risk recurrences and the corresponding interior Jacobian. The scalar equilibrium and stability conditions are independently tested. The coupled endogenous case remains a separate mathematical case and must include detector-state derivatives before a stronger Jacobian claim is made.
+
+## 4. Recovery Elasticity Ratio
 
 The proposed condition
 
-`Λ = ρ_recovery / (β_slash f_byz + δ_attenuation) >= 1`
+`Lambda = rho_recovery / (beta_slash f_byz + delta_attenuation) >= 1`
 
-may be a valid condition for a separately defined trust-mass recurrence, but the archived implementation does not itself encode that recurrence. The implementation uses fixed `SLASH=35`, `RECOVER=6`, heuristic trust updates, predictive attenuation, and adaptive quorum logic.
+may be a valid condition for a separately defined trust-mass recurrence, but it is **not** an empirical theorem of the archived simulator. It must remain conditional on its explicit recurrence, assumptions, parameter mapping, and independent sweeps across both sides of the boundary.
 
-Therefore the present artifact can support **implementation behavior under the archived simulator**, but it cannot by itself establish the claimed necessary-and-sufficient Λ theorem. To establish that theorem empirically, the paper/code needs an explicit implementation of the mathematical recurrence, parameter mapping, equilibrium calculation, and controlled sweeps on both sides of Λ=1.
+No universal `Lambda >= 1` claim is permitted for the archived affine simulator.
 
-## 4. Physical AC-grid claim
+## 5. Physical AC-grid claim
 
-The current expert-validation workflow independently solves standard pandapower test networks. That validates the installed numerical power-flow stack, not the previously stated 9,450-case AEGIS cyber-physical result.
+The expert-validation workflow independently solves standard pandapower test networks. That validates the numerical power-flow stack, not the previously stated 9,450-case AEGIS cyber-physical result.
 
-The claim that predictive risk attenuation eliminated 100% of attack-induced overloads/voltage deviations therefore remains **unvalidated by this repository state** until the exact AC network, attack cases, controller mapping, outputs, and baseline/predictive comparison are reproducibly included.
+The claim that predictive risk attenuation eliminated 100% of attack-induced overloads/voltage deviations remains **unvalidated** until the exact AC network, attack cases, controller mapping, outputs, and baseline/predictive comparison are reproducibly included.
 
-## 5. Publication consequence
+## 6. Current validation status
+
+The canonical kernel now has deterministic replay, state-domain, observable-drift, scalar-equilibrium, strict quorum-boundary, certificate-threshold, and scenario-input tests. These tests are validation of the implementation contract; they are not a substitute for the missing physical-grid evidence or a manuscript-level audit.
+
+## 7. Publication consequence
 
 The strongest defensible story at this stage is:
 
-> AEGIS introduces predictive epistemic containment into an adaptive trust-weighted consensus mechanism and changes the phase-space distribution of successful consensus outcomes. The effect is strongly phase-dependent: some attack/recovery regimes improve while others deteriorate. The proposed Recovery Elasticity Ratio is a mathematical condition that requires a separately implemented and validated recurrence before it can be presented as an empirically established necessary-and-sufficient theorem.
+> AEGIS defines a predictive epistemic containment mechanism within an adaptive trust-weighted consensus model. The canonical implementation is deterministic conditional on explicit detector/scenario inputs and is mathematically aligned with the stated trust, risk, influence, quorum, and certificate rules. The archived empirical study shows phase-dependent changes rather than a universal predictive advantage. The Recovery Elasticity Ratio remains a conditional analytical result until its recurrence and boundary sweeps are independently validated. The previously stated 9,450-case physical-grid result is not established by the current repository evidence.
 
-This wording is substantially safer and stronger scientifically than claiming universal performance gains or presenting the current simulator as proof of a theorem it does not explicitly implement.
+This wording is substantially safer and stronger scientifically than claiming universal performance gains or using the historical shell simulator as proof of a theorem it does not explicitly implement.
