@@ -1,0 +1,1 @@
+Validation scope is fixed and must not be changed after CI begins: canonical kernel, six scenarios, ten seeds, thirty rounds, repeated execution, fixed-quorum reference, no unsupported physical or named-protocol performance claims.
