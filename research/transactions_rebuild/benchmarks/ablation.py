@@ -44,7 +44,7 @@ def run_case(variant: str, seed: int, location: str = "C", evidence: float = 0.6
         trace = k.step(e, d, {v: True for v in VALIDATORS}, {v: True for v in VALIDATORS},
                         height=1, view=r, proposal_id=f"ablation-{variant}-{seed}")
         overall_final += int(trace.finalized)
-        margins.append(trace.quorum_margin)
+        margins.append(trace.commit_weight - trace.quorum_weight)
         if attacked:
             attack_final += int(trace.finalized)
     return {
@@ -67,8 +67,7 @@ def write_csv(rows: list[dict], path: str | Path = "experiments/ablation.csv") -
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]))
-        w.writeheader(); w.writerows(rows)
+        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 
 
 if __name__ == "__main__":
