@@ -82,6 +82,8 @@ def audit():
         ),
     }
     (OUT / "theorem_audit.json").write_text(json.dumps(result, indent=2))
+    if counters:
+        raise AssertionError(f"Corrected recurrence theorem audit found {len(counters)} counterexamples")
     print(json.dumps(result, indent=2))
 
 
