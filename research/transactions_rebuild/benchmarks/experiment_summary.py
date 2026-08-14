@@ -30,7 +30,9 @@ if __name__ == "__main__":
     abl = rows("experiments/ablation.csv")
     for variant in sorted({r["variant"] for r in abl}):
         xs = [float(r["attack_finalization_rate"]) for r in abl if r["variant"] == variant]
-        print("ABLATION", variant, ci95(xs))
+        unsafe = [float(r["unsafe_certificate_boundary_fraction"]) for r in abl if r["variant"] == variant]
+        safety = [float(r["mean_safety_margin"]) for r in abl if r["variant"] == variant]
+        print("ABLATION", variant, "availability_ci95", ci95(xs), "unsafe_boundary_ci95", ci95(unsafe), "safety_margin_ci95", ci95(safety))
 
     loc = rows("experiments/localization.csv")
     for v in sorted({r["location"] for r in loc}):
