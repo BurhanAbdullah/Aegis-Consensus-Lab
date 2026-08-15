@@ -2,7 +2,7 @@ name: tag4-transactions-strict
 
 on:
   push:
-    branches: ['tag4-transactions-10of10-v*']
+    branches: ['tag4-transactions-release-v*']
   pull_request:
     branches: [tag4]
 
@@ -36,6 +36,10 @@ jobs:
         run: python -m research.transactions_rebuild.benchmarks.generate_publication_tables
       - name: Verify comparison artifacts
         run: test -s experiments/publication_comparison.csv && test -s experiments/publication_tables.tex
+      - name: Verify frozen data and figure provenance
+        env:
+          PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
+        run: python -m research.transactions_rebuild.benchmarks.verify_release_provenance_v2
       - name: Verify implementation-only Transactions gate
         run: test -s research/transactions_rebuild/TRANSACTIONS_PROJECT_10OF10_GATE.md
       - name: Record exact head
