@@ -16,6 +16,7 @@ This is the release gate for the Transactions-targeted tag4 rebuild.
 - [x] Spectral-radius stability condition derived.
 - [x] 2-D Jury cross-check specified.
 - [x] Security–availability feasible set defined.
+- [x] Heterogeneous equilibrium distinguished from homogeneous scalar reference reduction.
 
 ## B. Mathematical validation
 
@@ -26,7 +27,9 @@ This is the release gate for the Transactions-targeted tag4 rebuild.
 - [x] Containment boundary tests.
 - [x] Projection/interior distinction tested.
 - [x] Independent 1000-case numerical cross-validation script.
-- [ ] Final manuscript equations independently typeset and audited against the canonical source.
+- [x] Manuscript equations audited against the canonical model.
+- [x] Scalar quorum boundary explicitly marked as a reference reduction rather than the full heterogeneous boundary.
+- [x] Exogenous-input stability theorem explicitly separated from endogenous-detector dynamics.
 
 ## C. Empirical validation
 
@@ -39,6 +42,8 @@ This is the release gate for the Transactions-targeted tag4 rebuild.
 - [x] Publication artifact generation.
 - [x] Repeated deterministic generation.
 - [ ] Final manuscript tables regenerated from release artifacts.
+- [ ] Final manuscript figures regenerated/verified against the frozen release artifacts.
+- [ ] Release-environment manuscript compilation verified.
 
 ## D. Scientific comparison
 
@@ -60,6 +65,13 @@ Check identical traces, attack timing, evidence magnitude, drift, seeds, sample 
 
 Check whether the paper makes one precise contribution, whether the mathematical object is genuinely new or materially useful, whether the comparison is fair, and whether every claim is proportionate to the evidence.
 
-## F. Final release rule
+## F. Current release blockers
 
-10/10 means **all gates are green**, not that the current code merely passes tests. The release remains blocked until the actual manuscript is reconciled to the canonical model and frozen experiment artifacts.
+1. Final manuscript tables must be generated from the actual frozen experiment artifacts.
+2. Final manuscript figures must be regenerated or explicitly verified against the same artifacts.
+3. The exact release-environment manuscript compilation must pass.
+4. A final independent theorem-to-equation-to-code audit must pass after those artifacts are frozen.
+
+## G. Final release rule
+
+10/10 means **all gates are green**, not that the current code merely passes tests. The release remains blocked until the manuscript, figures, tables, code, and frozen experiment artifacts are mutually reconciled.
