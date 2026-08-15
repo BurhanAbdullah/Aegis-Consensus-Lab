@@ -2,9 +2,9 @@ name: tag4-transactions-strict
 
 on:
   push:
-    branches: [tag4-transactions-10of10-v10]
+    branches: [tag4-transactions-10of10-v11]
   pull_request:
-    branches: [tag4-transactions-10of10-v10]
+    branches: [tag4]
 
 jobs:
   transactions_strict_validation:
@@ -34,5 +34,7 @@ jobs:
           cmp /tmp/strict_cv_1.csv experiments/strict_cross_validation.csv
       - name: Verify mathematical artifact
         run: test -s experiments/strict_cross_validation.csv
+      - name: Verify manuscript audit is present
+        run: test -s research/transactions_rebuild/MANUSCRIPT_MODEL_AUDIT_v1.md
       - name: Record exact head
         run: git rev-parse HEAD
