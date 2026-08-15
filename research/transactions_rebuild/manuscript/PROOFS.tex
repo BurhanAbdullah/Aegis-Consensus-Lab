@@ -1,0 +1,98 @@
+\section{Formal Results and Proofs}
+
+\subsection{Trust invariance}
+\textbf{Proposition 1.} For any $T\in\mathbb{R}^m$, the projected trust update
+\[
+T^+=\Pi_{[0,1]^m}[T+\rho(\mathbf 1-T)-\ell ET]
+\]
+lies in $[0,1]^m$.
+
+\textit{Proof.} The projection $\Pi_{[0,1]^m}$ is the componentwise Euclidean projection onto the closed hypercube. By definition its image is contained in $[0,1]^m$. Hence $T^+\in[0,1]^m$ independently of the unprojected value. \hfill$\square$
+
+\subsection{Interior trust equilibrium and convergence}
+\textbf{Proposition 2.} For fixed $E\in[0,1]$, with $\rho+\ell E>0$, the unclipped scalar trust map
+\[
+\tau^+=\tau+\rho(1-\tau)-\ell E\tau
+\]
+has the unique fixed point
+\[
+\tau^*=\frac{\rho}{\rho+\ell E}.
+\]
+Its local asymptotic stability condition is
+\[
+|1-\rho-\ell E|<1,
+\]
+equivalently $0<\rho+\ell E<2$.
+
+\textit{Proof.} Setting $\tau^+=\tau$ gives $\rho-(\rho+\ell E)\tau=0$, which yields the stated fixed point because the denominator is positive. The error $e_k=\tau_k-\tau^*$ satisfies $e_{k+1}=(1-\rho-\ell E)e_k$. Thus $e_k\to0$ geometrically if and only if the multiplier has magnitude strictly below one. \hfill$\square$
+
+\subsection{Risk equilibrium and containment}
+\textbf{Proposition 3.} For $0\le a<1$ and fixed $(E,D)$, the unclipped risk map
+\[
+R^+=aR+(1-a)E+cD
+\]
+has fixed point
+\[
+R^*=E+\frac{cD}{1-a}.
+\]
+This equilibrium belongs to $[0,1]$ precisely when
+\[
+(1-a)E+cD\le1-a,
+\]
+under $E,D\ge0$.
+
+\textit{Proof.} Solving $R^+=R$ gives $(1-a)R=(1-a)E+cD$. Since $1-a>0$, the fixed point is unique. Nonnegativity follows from $E,D,c\ge0$. The upper bound $R^*\le1$ is equivalent to $(1-a)E+cD\le1-a$. \hfill$\square$
+
+\subsection{Full Jacobian and stability}
+\textbf{Proposition 4.} At an interior point with fixed exogenous $(E_i,D_i)$, the Jacobian of the canonical $(m+1)$-state map is
+\[
+J_i=\operatorname{diag}(\beta_i I_m,a_i),\qquad
+\beta_i=1-\rho_i-\ell_iE_i,
+\]
+and therefore
+\[
+\rho(J_i)=\max\{|\beta_i|,|a_i|\}.
+\]
+The interior equilibrium is locally asymptotically stable if and only if $|\beta_i|<1$ and $|a_i|<1$.
+
+\textit{Proof.} With the projection inactive, each trust component depends only on its own previous component and the risk state depends only on its own previous risk state. Hence all off-diagonal partial derivatives are zero and the stated block-diagonal matrix follows. The eigenvalues are $\beta_i$ with multiplicity $m$ and $a_i$. The spectral radius is therefore the maximum of their magnitudes. A discrete-time fixed point is locally asymptotically stable exactly when all Jacobian eigenvalues lie strictly inside the unit disk. \hfill$\square$
+
+\subsection{Weighted quorum safety}
+\textbf{Proposition 5.} Let total normalized governance weight be one and let each valid quorum contain weight at least $q$. For any two quorums $Q_1,Q_2$,
+\[
+w(Q_1\cap Q_2)\ge 2q-1.
+\]
+If Byzantine governance weight is at most $b$ and
+\[
+q>\frac{1+b}{2},
+\]
+then the intersection contains positive honest governance weight.
+
+\textit{Proof.} Since $w(Q_1\cup Q_2)\le1$, inclusion--exclusion gives
+$w(Q_1\cap Q_2)=w(Q_1)+w(Q_2)-w(Q_1\cup Q_2)\ge2q-1$. The strict quorum condition gives $2q-1>b$. Therefore the intersection weight exceeds the maximum Byzantine weight and must contain honest weight. Under authenticated context and honest non-equivocation, two conflicting valid certificates cannot both exist for the same height, view, phase, and proposal context. \hfill$\square$
+
+\subsection{Availability and conservative operating interval}
+\textbf{Proposition 6.} If honest participating governance weight is $h$, an honest certificate is achievable whenever $q\le h$. Under the conservative bound $h\ge1-b$, the sufficient safety-and-availability interval is
+\[
+\frac{1+b}{2}<q\le1-b,
+\]
+which is nonempty if and only if $b<1/3$.
+
+\textit{Proof.} An honest certificate can reach threshold $q$ whenever the honest participating weight is at least $q$. Combining this with Proposition 5 gives the stated interval under $h\ge1-b$. Nonemptiness requires $(1+b)/2<1-b$, equivalent to $3b<1$. \hfill$\square$
+
+\subsection{Jury equivalence for the coupled reduction}
+\textbf{Proposition 7.} For a real $2\times2$ Jacobian $J$ with characteristic polynomial $\lambda^2-\operatorname{tr}(J)\lambda+\det(J)$, Schur stability is equivalent to
+\[
+1-\operatorname{tr}(J)+\det(J)>0,
+\]
+\[
+1+\operatorname{tr}(J)+\det(J)>0,
+\]
+\[
+1-\det(J)>0.
+\]
+
+\textit{Proof.} These are the standard second-order Jury inequalities for a monic real quadratic in discrete time. The implementation independently checks their classification against direct eigenvalue spectral-radius classification over random real $2\times2$ matrices. \hfill$\square$
+
+\subsection{Scope of the analytical boundary}
+The scalar quorum expression $q^*_{\mathrm{ref}}$ is not promoted to a theorem about the full heterogeneous governance system. In the canonical model, $q_k$ depends on $\bar\tau_k$, which depends on the state-dependent governance weights $G_{i,k}$ and therefore on both trust and risk. Consequently, the full boundary is the feasible set $\mathcal F$ defined from the complete state-dependent $q^*(\theta)$ and the coupled Jacobian. The scalar expression is retained only as a transparent reference reduction whose assumptions are explicitly stated.
