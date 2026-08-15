@@ -1,7 +1,8 @@
 """Generate manuscript tables only from frozen release experiment artifacts.
 
 No values are hard-coded. The script fails closed if either source artifact is
-missing or if the two round-indexed traces do not have identical round IDs.
+missing, if the traces differ in round IDs, or if the frozen release is not the
+expected 200-round artifact set.
 """
 from __future__ import annotations
 
@@ -38,15 +39,14 @@ def summarize(rows):
 
 def run():
     base, pred = load(BASE), load(PRED)
+    if len(base) != 200 or len(pred) != 200:
+        raise ValueError("publication release artifacts must each contain exactly 200 rounds")
     base_rounds = [int(r["round"]) for r in base]
     pred_rounds = [int(r["round"]) for r in pred]
     if base_rounds != pred_rounds:
         raise ValueError("reference and predictive artifacts do not share identical round IDs")
 
     sb, sp = summarize(base), summarize(pred)
-    paired_success_delta = sp["success_rate"] - sb["success_rate"]
-    paired_quorum_delta = sp["mean_quorum"] - sb["mean_quorum"]
-    paired_safety_delta = sp["mean_safety"] - sb["mean_safety"]
 
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with OUT_CSV.open("w", newline="", encoding="utf-8") as f:
@@ -56,7 +56,7 @@ def run():
         for metric in ["success_rate", "mean_quorum", "mean_safety", "mean_commit", "mean_total_weight"]:
             w.writerow({"metric": metric, "reference": f"{sb[metric]:.10g}",
                         "predictive": f"{sp[metric]:.10g}",
-                        "predictive_minus_reference": f"{sp[metric]-sb[metric]:.10g}"})
+                        "predictive_minus_reference": f"{sp[metric]-sb[metric]:.10g"})
 
     tex = r"""% Auto-generated from archive/final_run/experiments/*.csv; do not edit by hand.
 \begin{table}[t]
@@ -77,8 +77,7 @@ Metric & Reference & Predictive & Difference \\
     }
     for metric in labels:
         if metric == "success_rate":
-            vals = (100*sb[metric], 100*sp[metric], 100*paired_success_delta)
-            tex += f"{labels[metric]} (\%) & {vals[0]:.2f} & {vals[1]:.2f} & {vals[2]:+.2f} \\\n"
+            tex += f"{labels[metric]} (\%) & {100*sb[metric]:.2f} & {100*sp[metric]:.2f} & {100*(sp[metric]-sb[metric]):+.2f} \\\n"
         else:
             tex += f"{labels[metric]} & {sb[metric]:.2f} & {sp[metric]:.2f} & {sp[metric]-sb[metric]:+.2f} \\\n"
     tex += r"""\bottomrule
