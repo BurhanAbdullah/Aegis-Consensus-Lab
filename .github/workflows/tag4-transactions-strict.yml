@@ -32,8 +32,17 @@ jobs:
           cp experiments/strict_cross_validation.csv /tmp/strict_cv_1.csv
           python -m research.transactions_rebuild.benchmarks.strict_cross_validation
           cmp /tmp/strict_cv_1.csv experiments/strict_cross_validation.csv
-      - name: Verify mathematical artifact
-        run: test -s experiments/strict_cross_validation.csv
+      - name: Generate publication tables from frozen artifacts
+        run: python -m research.transactions_rebuild.benchmarks.generate_publication_tables
+      - name: Verify generated publication artifacts
+        run: test -s experiments/publication_comparison.csv && test -s experiments/publication_tables.tex
+      - name: Install manuscript compilation environment
+        run: sudo apt-get update && sudo apt-get install -y texlive-latex-base
+      - name: Compile Transactions manuscript
+        working-directory: research/transactions_rebuild/manuscript
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error AEGIS_Tag4_Transactions_Draft.tex
+          pdflatex -interaction=nonstopmode -halt-on-error AEGIS_Tag4_Transactions_Draft.tex
       - name: Verify manuscript audit is present
         run: test -s research/transactions_rebuild/MANUSCRIPT_MODEL_AUDIT_v1.md
       - name: Record exact head
