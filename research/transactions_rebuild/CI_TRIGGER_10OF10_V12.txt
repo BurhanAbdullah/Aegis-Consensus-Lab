@@ -1,0 +1,2 @@
+Transactions implementation gate trigger v12.
+All validation is implementation-only; manuscript work is intentionally excluded from this gate.
