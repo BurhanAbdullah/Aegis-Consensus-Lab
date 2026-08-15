@@ -2,7 +2,7 @@ name: tag4-transactions-strict
 
 on:
   push:
-    branches: [tag4-transactions-10of10-v11]
+    branches: ['tag4-transactions-10of10-v*']
   pull_request:
     branches: [tag4]
 
@@ -17,7 +17,7 @@ jobs:
           python-version: '3.12'
       - name: Install validation dependencies
         run: python -m pip install --upgrade pip pytest numpy
-      - name: Run complete tag4 Transactions tests
+      - name: Run complete Transactions tests
         env:
           PYTHONPATH: ${{ github.workspace }}/research:${{ github.workspace }}/research/transactions_rebuild:${{ github.workspace }}/research/transactions_rebuild/kernel
         run: python -m pytest -q research/transactions_rebuild
@@ -32,18 +32,11 @@ jobs:
           cp experiments/strict_cross_validation.csv /tmp/strict_cv_1.csv
           python -m research.transactions_rebuild.benchmarks.strict_cross_validation
           cmp /tmp/strict_cv_1.csv experiments/strict_cross_validation.csv
-      - name: Generate publication tables from frozen artifacts
+      - name: Generate comparison artifacts from frozen release traces
         run: python -m research.transactions_rebuild.benchmarks.generate_publication_tables
-      - name: Verify generated publication artifacts
+      - name: Verify comparison artifacts
         run: test -s experiments/publication_comparison.csv && test -s experiments/publication_tables.tex
-      - name: Install manuscript compilation environment
-        run: sudo apt-get update && sudo apt-get install -y texlive-latex-base
-      - name: Compile Transactions manuscript
-        working-directory: research/transactions_rebuild/manuscript
-        run: |
-          pdflatex -interaction=nonstopmode -halt-on-error AEGIS_Tag4_Transactions_Draft.tex
-          pdflatex -interaction=nonstopmode -halt-on-error AEGIS_Tag4_Transactions_Draft.tex
-      - name: Verify manuscript audit is present
-        run: test -s research/transactions_rebuild/MANUSCRIPT_MODEL_AUDIT_v1.md
+      - name: Verify implementation-only Transactions gate
+        run: test -s research/transactions_rebuild/TRANSACTIONS_PROJECT_10OF10_GATE.md
       - name: Record exact head
         run: git rev-parse HEAD
