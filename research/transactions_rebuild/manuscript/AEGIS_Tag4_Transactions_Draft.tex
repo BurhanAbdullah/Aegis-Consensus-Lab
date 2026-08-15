@@ -167,6 +167,13 @@ The general model instead uses the full state-dependent quantity $q^*(\theta)$ a
 \end{equation}
 The empirical study must compare observed safe/available outcomes against this analytical set using independent validation points.
 
+\section{Reproducible Experimental Comparison}
+The release contains two frozen 200-round traces under `archive/final_run/experiments/`: a reference trace and a predictive trace. The publication table is generated directly from those CSV artifacts by `generate_publication_tables.py`; no headline number is manually entered in the manuscript. The two traces are required to have identical round identifiers before the comparison table is generated.
+
+\input{../../experiments/publication_tables.tex}
+
+The table is a descriptive artifact-level comparison, not a causal claim. Because the archived traces do not contain the raw case-level evidence required to independently reproduce the historical 9,450-case physical validation claim, that claim is excluded. The release comparison is therefore limited to the supplied 200-round traces and their recorded outcomes.
+
 \section{Validation Protocol}
 The reference implementation is deterministic conditional on scenario inputs. The validation suite checks domain invariance, deterministic replay, closed-form equilibrium fixed points, exact Jacobians against finite differences, full-state spectral-radius identities, Jury conditions against direct Schur stability, observable-drift normalization, risk-containment boundaries, weighted-certificate semantics, quorum intersection, and certificate-driven finalization.
 
@@ -174,12 +181,10 @@ The independent cross-validation suite samples parameter configurations using fr
 
 The empirical protocol requires common scenario seeds across baselines and the full model. Required attack families include burst injection, slow drift, stealth, equivocation, mixed attacks, and participation degradation. Primary empirical metrics include safety violation rate, finalization rate, false acceptance, false rejection, detection latency, quorum margins, recovery time, and computational overhead. Baseline comparisons must use identical traces, attack timing, evidence magnitude, seeds, and stopping criteria.
 
-No claim of an independently reproduced 9,450-case physical validation set is made here because the raw trace bundle needed for independent reproduction is not present in the canonical rebuild. Such evidence must be added before a physical-system validation claim is promoted.
-
 \section{Limitations}
-The stability theorem is an interior, deterministic-input result. Projection boundaries, endogenous detector dynamics, asynchronous liveness, stochastic convergence, and physical testbed validation require separate evidence. The scalar quorum boundary is explicitly a homogeneous reference reduction and must not be presented as the exact boundary of the full heterogeneous governance model. The present manuscript consequently does not claim results beyond the implemented mathematical assumptions.
+The stability theorem is an interior, deterministic-input result. Projection boundaries, endogenous detector dynamics, asynchronous liveness, stochastic convergence, and physical testbed validation require separate evidence. The scalar quorum boundary is explicitly a homogeneous reference reduction and must not be presented as the exact boundary of the full heterogeneous governance model. The present empirical comparison is limited to the frozen release traces; broader protocol comparisons require protocol-equivalent implementations and matched assumptions.
 
 \section{Conclusion}
-The rebuild gives AEGIS a single mathematical contract connecting detector observables, trust, predictive risk, governance influence, quorum selection, and certificate finalization. The heterogeneous equilibrium, exact interior Jacobian, risk-containment condition, coupled stability test, and security--availability operating set are separated from the scalar reference reduction used for closed-form boundary analysis. This structure makes the theoretical claims auditable and provides a direct path for independent numerical validation without conflating implementation checks with mathematical proof.
+The rebuild gives AEGIS a single mathematical contract connecting detector observables, trust, predictive risk, governance influence, quorum selection, and certificate finalization. The heterogeneous equilibrium, exact interior Jacobian, risk-containment condition, coupled stability test, and security--availability operating set are separated from the scalar reference reduction used for closed-form boundary analysis. The publication comparison is generated from frozen artifacts, making the theoretical and empirical claims auditable without conflating implementation checks with mathematical proof.
 
 \end{document}
