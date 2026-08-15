@@ -1,0 +1,4 @@
+Transactions release candidate: tag4-transactions-release-final
+Validated implementation base: bdbfacbf548f0b46d0a62e2b0cc7b5b2c3c38aa1
+Validation runs: tag4-transactions-strict #20; tag4-validation #109
+Use TRANSACTIONS_RELEASE_DATA_GUIDE.md for paper data and figure paths.
