@@ -36,6 +36,8 @@ jobs:
         run: python -m research.transactions_rebuild.benchmarks.generate_publication_tables
       - name: Verify comparison artifacts
         run: test -s experiments/publication_comparison.csv && test -s experiments/publication_tables.tex
+      - name: Verify frozen data and figure provenance
+        run: python -m research.transactions_rebuild.benchmarks.verify_release_provenance
       - name: Verify implementation-only Transactions gate
         run: test -s research/transactions_rebuild/TRANSACTIONS_PROJECT_10OF10_GATE.md
       - name: Record exact head
